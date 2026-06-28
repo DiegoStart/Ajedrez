@@ -1,3 +1,5 @@
+package core;
+
 public abstract class Pieza {
     protected String nombre;
     protected int fila;

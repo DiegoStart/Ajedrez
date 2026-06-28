@@ -1,3 +1,8 @@
+package consola;
+
+import core.*;
+import persistencia.*;
+
 public class AjedrezAlpha {
     public static void main(String[] args) {
         AjedrezConsulta consulta = new AjedrezConsulta();

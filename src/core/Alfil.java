@@ -1,3 +1,5 @@
+package core;
+
 public class Alfil extends Pieza {
     public Alfil(int fila, int columna, boolean esBlanca) {
         super("Alfil", fila, columna, esBlanca);

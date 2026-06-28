@@ -1,3 +1,5 @@
+package core;
+
 public class Temporizador extends Thread {
     private volatile int segundos;
     private volatile boolean pausado = true;

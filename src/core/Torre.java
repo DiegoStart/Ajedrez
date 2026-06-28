@@ -1,3 +1,5 @@
+package core;
+
 public class Torre extends Pieza {
     public Torre(int fila, int columna, boolean esBlanca) {
         super("Torre", fila, columna, esBlanca);

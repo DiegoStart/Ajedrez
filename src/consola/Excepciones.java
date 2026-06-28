@@ -1,3 +1,5 @@
+package consola;
+
 import java.util.Scanner;
 
 public class Excepciones {

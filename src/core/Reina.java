@@ -1,3 +1,5 @@
+package core;
+
 public class Reina extends Pieza {
     public Reina(int fila, int columna, boolean esBlanca) {
         super("Reina", fila, columna, esBlanca);

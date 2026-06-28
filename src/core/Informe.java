@@ -1,3 +1,5 @@
+package core;
+
 public class Informe {
     private String pieza;
     private boolean esBlanca;

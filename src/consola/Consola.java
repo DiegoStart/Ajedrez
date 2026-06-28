@@ -1,3 +1,7 @@
+package consola;
+
+import core.*;
+
 public class Consola {
     private Tablero tablero;
 
