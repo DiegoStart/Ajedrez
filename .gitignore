@@ -1,0 +1,10 @@
+*.class
+bin/
+build/
+dist/
+
+.vscode/
+.idea/
+nbproject/private/
+
+config.properties
