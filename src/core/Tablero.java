@@ -155,6 +155,7 @@ public class Tablero {
     }
 
     public Informe getInforme() {
+        analisisDeEstado(informe);
         return informe;
     }
 
@@ -702,6 +703,31 @@ public class Tablero {
             }
         }
         return mensaje.toString();
+    }
+
+    public void analisisDeEstado(Informe nuevoInforme) {
+        if (tablasAhogado(getEsTurnoBlanco())) {        
+            nuevoInforme.setCausaTablas("Ahogado");
+        }
+
+        if (tablasMaterialInsuficiente()) {
+            nuevoInforme.setCausaTablas("Material Insuficiente");
+        }
+
+        if (tablasCincuentaMovimientos()) {
+            nuevoInforme.setCausaTablas("50 Movimientos");
+        }
+
+        if (tablasTripleRepeticion()) {
+            nuevoInforme.setCausaTablas("Triple Repetición");
+        }
+
+        if (estaEnJaque(getEsTurnoBlanco())) {
+            nuevoInforme.setJaque(true);
+            if (estaJaqueMate(getEsTurnoBlanco())) {
+                informe.setJaqueMate(true);
+            }
+        }
     }
     // =====================================================
     // TABLAS Y FINALIZACIÓN

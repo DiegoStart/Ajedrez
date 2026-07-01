@@ -145,15 +145,10 @@ public class AjedrezAlpha {
     }
 
     private static boolean verificarFin(AjedrezConsulta consulta, Consola consola, Tablero tablero, int partida) {
-        Informe informe = tablero.getInforme();
-
         if (tablero.tablasAhogado(tablero.getEsTurnoBlanco())) {
             consola.mensaje("¡Alto! Ya no hay movimientos validos");
             consola.mensaje("¡Fin del Juego! Tablas por ahogado.");
             consulta.actualizarPartida(partida, "Finalizada", "1/2 - 1/2", "Ahogado");
-            if (informe != null) {
-                informe.setCausaTablas("Ahogado");
-            }
             return true;
         }
 
@@ -161,9 +156,6 @@ public class AjedrezAlpha {
             consola.mensaje("¡Alto! Ya no hay piezas suficientes para continuar");
             consola.mensaje("¡Fin del Juego! Tablas por material insuficiente.");
             consulta.actualizarPartida(partida, "Finalizada", "1/2 - 1/2", "Material Insuficiente");
-            if (informe != null) {
-                informe.setCausaTablas("Material Insuficiente");
-            }
             return true;
         }
 
@@ -171,9 +163,6 @@ public class AjedrezAlpha {
             consola.mensaje("¡Alto! Han transcurrido 50 movimientos sin capturas ni movimientos de peón.");
             consola.mensaje("¡Fin del Juego! Tablas por regla de los 50 movimientos.");
             consulta.actualizarPartida(partida, "Finalizada", "1/2 - 1/2", "50 Movimientos");
-            if (informe != null) {
-                informe.setCausaTablas("50 Movimientos");
-            }
             return true;
         }
 
@@ -181,9 +170,6 @@ public class AjedrezAlpha {
             consola.mensaje("¡Alto! Ya no hay movimientos válidos.");
             consola.mensaje("¡Fin del Juego! Tablas por triple repetición.");
             consulta.actualizarPartida(partida, "Finalizada", "1/2 - 1/2", "Triple Repetición");
-            if (informe != null) {
-                informe.setCausaTablas("Triple Repetición");
-            }
             return true;
         }
 
@@ -191,9 +177,6 @@ public class AjedrezAlpha {
             String jugador = tablero.getEsTurnoBlanco() ? tablero.getJugadorBlanco().getNombre() : tablero.getJugadorNegro().getNombre();
             consola.mensaje("¡Cuidado %s! tu Rey está en jaque.", jugador);
             consola.mensaje(tablero.EscapeDelRey(tablero.getEsTurnoBlanco()));
-            if (informe != null) {
-                informe.setJaque(true);
-            }
 
             if (tablero.estaJaqueMate(tablero.getEsTurnoBlanco())) {
                 String ganador = tablero.getEsTurnoBlanco() ? tablero.getJugadorNegro().getNombre() : tablero.getJugadorBlanco().getNombre();
@@ -201,9 +184,6 @@ public class AjedrezAlpha {
                 consola.mensaje("¡Jaque mate! %s ha perdido.", jugador);
                 consola.mensaje("Ganador: %s", ganador);
                 consulta.actualizarPartida(partida, "Finalizada", resultado, "Jaque Mate");
-                if (informe != null) {
-                    informe.setJaqueMate(true);
-                }
                 return true;
             }
         }
