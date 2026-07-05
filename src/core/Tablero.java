@@ -281,6 +281,7 @@ public class Tablero {
         nuevoInforme.setNumeroMovimiento(contadorMovimientos);
         if (origen.getEsBlanca() != esTurnoBlanco) {
             nuevoInforme.setMensaje("Esa pieza no es tuya. No la toques.");
+            informe = nuevoInforme;
             return false; // No es el turno del jugador de la pieza
         }
         if (origen instanceof Rey && colOrigen == 4 && (colDestino == 2 || colDestino == 6)) {
@@ -704,31 +705,6 @@ public class Tablero {
         }
         return mensaje.toString();
     }
-
-    public void analisisDeEstado(Informe nuevoInforme) {
-        if (tablasAhogado(getEsTurnoBlanco())) {        
-            nuevoInforme.setCausaTablas("Ahogado");
-        }
-
-        if (tablasMaterialInsuficiente()) {
-            nuevoInforme.setCausaTablas("Material Insuficiente");
-        }
-
-        if (tablasCincuentaMovimientos()) {
-            nuevoInforme.setCausaTablas("50 Movimientos");
-        }
-
-        if (tablasTripleRepeticion()) {
-            nuevoInforme.setCausaTablas("Triple Repetición");
-        }
-
-        if (estaEnJaque(getEsTurnoBlanco())) {
-            nuevoInforme.setJaque(true);
-            if (estaJaqueMate(getEsTurnoBlanco())) {
-                informe.setJaqueMate(true);
-            }
-        }
-    }
     // =====================================================
     // TABLAS Y FINALIZACIÓN
     // =====================================================
@@ -826,5 +802,32 @@ public class Tablero {
     public boolean tablasTripleRepeticion() {
         String foto = getFoto();
         return registro.getOrDefault(foto, 0) >= 3;
+    }
+    // =====================================================
+    // DATOS DEL INFORME
+    // =====================================================
+    public void analisisDeEstado(Informe nuevoInforme) {
+        if (tablasAhogado(getEsTurnoBlanco())) {        
+            nuevoInforme.setCausaTablas("Ahogado");
+        }
+
+        if (tablasMaterialInsuficiente()) {
+            nuevoInforme.setCausaTablas("Material Insuficiente");
+        }
+
+        if (tablasCincuentaMovimientos()) {
+            nuevoInforme.setCausaTablas("50 Movimientos");
+        }
+
+        if (tablasTripleRepeticion()) {
+            nuevoInforme.setCausaTablas("Triple Repetición");
+        }
+
+        if (estaEnJaque(getEsTurnoBlanco())) {
+            nuevoInforme.setJaque(true);
+            if (estaJaqueMate(getEsTurnoBlanco())) {
+                nuevoInforme.setJaqueMate(true);
+            }
+        }
     }
 }

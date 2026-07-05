@@ -277,6 +277,9 @@ public class AjedrezAlpha {
             }
               
             Informe informe = tablero.getInforme();
+            if (informe.tieneMensaje()) {
+                consola.mensaje(informe.getMensaje());
+            }
             consulta.registrarMovimiento(partida, informe);
             
             if (!informe.getEsBlanca()) {
