@@ -1,5 +1,8 @@
 package core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Informe {
     private String pieza;
     private boolean esBlanca;
@@ -18,6 +21,8 @@ public class Informe {
     private String mensaje;
     private String fotoPosterior;
     private String causaTablas;
+    private char piezaPromocion;
+    private List<int[]> candidatas;
 
     public Informe (String pieza, boolean esBlanca, int filaOrigen, int colOrigen, int filaDestino, int colDestino) {
         this.pieza = pieza;
@@ -26,6 +31,7 @@ public class Informe {
         this.colOrigen = colOrigen;
         this.filaDestino = filaDestino;
         this.colDestino = colDestino;
+        candidatas = new ArrayList<>();
     }
 
     public String getPieza() {
@@ -178,5 +184,102 @@ public class Informe {
 
     public boolean hayTablas() {
         return causaTablas != null && !causaTablas.isBlank();
+    }
+
+    public void setPiezaPromocion(char piezaPromocion) {
+        this.piezaPromocion = piezaPromocion;
+    }
+
+    public char getPiezaPromocion() {
+        return piezaPromocion;
+    }
+
+    public void setCadidatas(int[] candidata) { 
+        this.candidatas.add(candidata); 
+    }
+
+    private String Desambiguacion() {
+        if (candidatas == null || candidatas.isEmpty()) {
+            return "";
+        }
+
+        boolean columna = false;
+        boolean fila = false;
+        for (int[] candidata : candidatas) {
+            int filaCandidata = candidata[0];
+            int colCandidata = candidata[1];
+            if (colCandidata == colOrigen) {
+                columna = true;
+            }
+            if (filaCandidata == filaOrigen) {
+                fila = true;
+            }
+        }
+
+        char columnaOrigen = (char) ('a' + colOrigen);
+        int filOrigen = 8 - filaOrigen;
+        if (!columna) {
+            return "" + columnaOrigen;
+        }
+        if (!fila) {
+            return "" + filOrigen;
+        }
+        return "" + columnaOrigen + filOrigen;
+    }
+
+    private String inicialPieza() {
+        switch (pieza) {
+            case "Rey":
+                return "R";
+            case "Reina":
+                return "D";
+            case "Torre":
+                return "T";
+            case "Alfil":
+                return "A";
+            case "Caballo":
+                return "C";
+            case "Peon":
+                return "";
+            default:
+                return "";
+        }
+    }
+
+    public String notacionAlgebraica() {
+        String notacion;
+        String desambiguacion = Desambiguacion();
+        char columnaDestino = (char) ('a' + colDestino);
+        char columnaOrigen = (char) ('a' + colOrigen);
+        int fila = 8 - filaDestino;
+
+        if (enroqueLargoCorto) {
+            notacion = colDestino == 6 ? "O-O" : "O-O-O";
+        } else if (capturaAlPaso) {
+            notacion = "" + columnaOrigen + "x" + columnaDestino + fila;
+        } else if (promocionPeon) {
+            if (captura) {
+                notacion = "" + columnaOrigen + "x" + columnaDestino + fila + "=" + piezaPromocion;
+            } else {
+                notacion = "" + columnaDestino + fila + "=" + piezaPromocion;
+            }
+        } else if (captura) {
+            if (pieza.equals("Peon")) {
+                notacion = "" + columnaOrigen + "x" + columnaDestino + fila;
+            } else {
+                notacion = inicialPieza() + desambiguacion + "x" + columnaDestino + fila;
+            }  
+        } else if (pieza.equals("Peon")) {
+            notacion = "" + columnaDestino + fila;
+        } else {
+            notacion = inicialPieza() + desambiguacion + columnaDestino + fila;
+        }
+
+        if (jaqueMate) {
+            notacion += "#";
+        } else if (jaque) {
+            notacion += "+";
+        }
+        return notacion;
     }
 }

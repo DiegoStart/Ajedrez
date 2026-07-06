@@ -168,6 +168,10 @@ public class Tablero {
         foto = getRespaldo() + "|" + turno + "|" + capturaAlPaso;
         return foto;
     }
+
+    public void setRegistro(HashMap<String, Integer> registro) {
+        this.registro = new HashMap<>(registro);
+    }
     // =====================================================
     // INICIALIZACIÓN Y RESTAURACIÓN
     // =====================================================
@@ -265,6 +269,10 @@ public class Tablero {
         String foto = getFoto();
         registro.put(foto, registro.getOrDefault(foto, 0) + 1);
     }
+
+    public void restaurarRegistro(HashMap<String, Integer> registro) {
+        this.registro = registro;
+    }
     // =====================================================
     // MOVIMIENTOS Y JUGADAS
     // =====================================================
@@ -355,7 +363,6 @@ public class Tablero {
             if (!caminoLibre(origen, filaDestino, colDestino)) {  
                 return false; // El camino no está libre
             }
-            
         }    
         if (!Simulacion(filaOrigen, colOrigen, filaDestino, colDestino)) {
             return false; // Movimiento ilegal, deja en jaque al propio rey
@@ -365,6 +372,7 @@ public class Tablero {
         } else {
             ultimoMovimiento = null; // Otros movimientos no afectan al al paso
         }
+        determinarDesambiguacion(origen, nuevoInforme, filaDestino, colDestino);
         tablero[filaOrigen][colOrigen] = null;
         tablero[filaDestino][colDestino] = origen;
         origen.setFila(filaDestino);
@@ -398,9 +406,11 @@ public class Tablero {
             relojNegras.reanudar();
             relojBlancas.pausar();
         }
-        registrarFoto();
-        nuevoInforme.setFotoPosterior(getFoto());
         informe = nuevoInforme;
+        if (!hayPromocion) {
+            registrarFoto();
+            informe.setFotoPosterior(getFoto());
+        }
         return true; 
     }
     
@@ -411,20 +421,26 @@ public class Tablero {
         switch (tipo) {   
             case 1:   
                 nueva = new Torre(filaPromocion, colPromocion, origen.getEsBlanca());
+                informe.setPiezaPromocion('T');
                 break;
             case 2: 
                 nueva = new Alfil(filaPromocion, colPromocion, origen.getEsBlanca());
+                informe.setPiezaPromocion('A');
                 break;
             case 3: 
                 nueva = new Caballo(filaPromocion, colPromocion, origen.getEsBlanca());
+                informe.setPiezaPromocion('C');
                 break;
             default: 
                 nueva = new Reina(filaPromocion, colPromocion, origen.getEsBlanca());
+                informe.setPiezaPromocion('D');
                 break;
         } 
         nueva.setSeMovio(true);
         tablero[filaPromocion][colPromocion] = nueva;
         hayPromocion = false;
+        registrarFoto();
+        informe.setFotoPosterior(getFoto());
     }
 
     public void aumentarContadorMovimientos() {
@@ -806,27 +822,62 @@ public class Tablero {
     // =====================================================
     // DATOS DEL INFORME
     // =====================================================
-    public void analisisDeEstado(Informe nuevoInforme) {
+    private void analisisDeEstado(Informe nuevoInforme) {
         if (tablasAhogado(getEsTurnoBlanco())) {        
             nuevoInforme.setCausaTablas("Ahogado");
         }
-
         if (tablasMaterialInsuficiente()) {
             nuevoInforme.setCausaTablas("Material Insuficiente");
         }
-
         if (tablasCincuentaMovimientos()) {
             nuevoInforme.setCausaTablas("50 Movimientos");
         }
-
         if (tablasTripleRepeticion()) {
             nuevoInforme.setCausaTablas("Triple Repetición");
         }
-
         if (estaEnJaque(getEsTurnoBlanco())) {
             nuevoInforme.setJaque(true);
             if (estaJaqueMate(getEsTurnoBlanco())) {
                 nuevoInforme.setJaqueMate(true);
+            }
+        }
+    }
+
+    private void determinarDesambiguacion(Pieza pieza, Informe nuevoInforme, int filaDestino, int colDestino) {
+        for (int filaOrigen = 0; filaOrigen < 8; filaOrigen++) {
+            for (int colOrigen = 0; colOrigen < 8; colOrigen++) {
+                if (pieza.getFila() == filaOrigen && pieza.getColumna() == colOrigen) {
+                    continue;
+                }
+                Pieza candidata = tablero[filaOrigen][colOrigen];
+                int[] coordenadas = {filaOrigen, colOrigen};
+                if (candidata == null || candidata.getClass() != pieza.getClass() || candidata.getEsBlanca() != pieza.getEsBlanca()) {
+                    continue;
+                }
+                if (tablero[filaDestino][colDestino] == null) { // Si esta vacio Movimiento normal
+                    if (!candidata.movimiento(filaDestino, colDestino)) {
+                        continue; // Movimiento no válido
+                    }
+                } else { // Si hay una pieza en la casilla destino Captura
+                    if (tablero[filaDestino][colDestino].getEsBlanca() == candidata.getEsBlanca()) {
+                        continue; // No puede capturar una pieza del mismo color
+                    }
+                    if (!candidata.ataca(filaDestino, colDestino)) {
+                        continue; // No puede capturar esa pieza
+                    }
+                }
+                if (candidata instanceof Peon) {
+                    continue; // No es valido para los peones
+                }
+                if (candidata instanceof Torre || candidata instanceof Alfil || candidata instanceof Reina) {
+                    if (!caminoLibre(candidata, filaDestino, colDestino)) {  
+                        continue; // El camino no está libre
+                    }
+                }    
+                if (!Simulacion(filaOrigen, colOrigen, filaDestino, colDestino)) {
+                    continue; // Movimiento ilegal, deja en jaque al propio rey
+                }
+                nuevoInforme.setCadidatas(coordenadas); // Guarda casillas de pieza candidata
             }
         }
     }

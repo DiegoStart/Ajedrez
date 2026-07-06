@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 
 public class AjedrezConsulta {
     Conexion conexion = new Conexion();
@@ -59,9 +60,8 @@ public class AjedrezConsulta {
     }
 
     public int registrarMovimiento(int idPartida, Informe informe) {
-        sql = "INSERT INTO movimiento " +
-            "(id_partida, numero_movimiento, color, origen, destino, pieza, pieza_capturada, tipo_movimiento, jaque, jaque_mate, causa_tablas) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_movimiento";
+        sql = "INSERT INTO movimiento (id_partida, numero_movimiento, color, origen, destino, pieza, " +
+            "pieza_capturada, tipo_movimiento, jaque, jaque_mate, causa_tablas, notacion_algebraica, pieza_promocion, foto_posterior) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_movimiento";
 
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
@@ -69,7 +69,8 @@ public class AjedrezConsulta {
             return -1;
         }
 
-        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn;
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida);
             pstmt.setInt(2, informe.getNumeroMovimiento());
             pstmt.setString(3, informe.getColorTexto());
@@ -81,18 +82,24 @@ public class AjedrezConsulta {
             pstmt.setBoolean(9, informe.getJaque());
             pstmt.setBoolean(10, informe.getJaqueMate());
             pstmt.setString(11, informe.getCausaTablas());
+            pstmt.setString(12, informe.notacionAlgebraica());
+            if (informe.getPromocionPeon()) {
+                pstmt.setString(13, String.valueOf(informe.getPiezaPromocion()));
+            } else {
+                pstmt.setNull(13, java.sql.Types.VARCHAR);
+            }
+            pstmt.setString(14, informe.getFotoPosterior());
 
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt("id_movimiento");
             }
-
         } catch (SQLException e) {
             System.out.println("Error al registrar movimiento: " + e.getMessage());
         }
         return -1;
     }
-    
+
     public void actualizarPartida(int idPartida, String estado, String resultado, String causa) {
         sql = "UPDATE partida SET estado = ?, resultado = ?, causa_finalizacion = ?, fecha_fin = CURRENT_TIMESTAMP WHERE id_partida = ?";
    
@@ -149,8 +156,7 @@ public class AjedrezConsulta {
 
     public Tablero cargarPartida(int idPartida) {
         sql = "SELECT t.tablero_actual, t.turno_actual, t.tiempo_blancas, t.tiempo_negras, t.ultimo_movimiento, t.contador_movimientos, t.cincuenta_movimientos, " +
-            "jb.nombre AS blanco, jn.nombre AS negro FROM tablero t JOIN partida p ON t.id_partida = p.id_partida " +
-            "JOIN jugador jb ON p.id_jugador_blanco = jb.id_jugador JOIN jugador jn ON p.id_jugador_negro = jn.id_jugador " +
+            "jb.nombre AS blanco, jn.nombre AS negro FROM tablero t JOIN partida p ON t.id_partida = p.id_partida JOIN jugador jb ON p.id_jugador_blanco = jb.id_jugador JOIN jugador jn ON p.id_jugador_negro = jn.id_jugador " +
             "WHERE t.id_partida = ? AND p.estado = 'En curso'";
         
         Connection conn = conexion.establecerConexion();
@@ -175,18 +181,14 @@ public class AjedrezConsulta {
 
                     String nombreBlanco = rs.getString("blanco");
                     String nombreNegro = rs.getString("negro");
-
                     Jugador blanco = new Jugador(nombreBlanco, true);
                     Jugador negro = new Jugador(nombreNegro, false);
 
                     Tablero tablero = new Tablero(blanco, negro);
-
                     tablero.restaurarPartida(respaldo);
-
                     int[] ultimoMovimiento = null;
                     if (ultimoMovimientoTexto != null && !ultimoMovimientoTexto.equals("-1,-1,-1,-1")) {
-                        String[] partes = ultimoMovimientoTexto.split(",");
-                        
+                        String[] partes = ultimoMovimientoTexto.split(",");           
                         ultimoMovimiento = new int[4];
                         ultimoMovimiento[0] = Integer.parseInt(partes[0]);
                         ultimoMovimiento[1] = Integer.parseInt(partes[1]);
@@ -194,6 +196,8 @@ public class AjedrezConsulta {
                         ultimoMovimiento[3] = Integer.parseInt(partes[3]);
                     }
                     tablero.restaurarEstado(turno.equals("Blanco"), ultimoMovimiento, tiempoBlancas, tiempoNegras, contadorMovimientos, cincuentaMovimientos);
+                    HashMap<String, Integer> registro = cargarFotosPosteriores(idPartida);
+                    tablero.restaurarRegistro(registro);
                     return tablero;
                 } else {
                     consola.mensaje("La partida no existe o ya fue finalizada.");
@@ -353,6 +357,30 @@ public class AjedrezConsulta {
         } catch (SQLException e) {
             System.out.println("Error al mostrar movimientos: " + e.getMessage());
         }
+    }
+
+    public HashMap<String, Integer> cargarFotosPosteriores(int idPartida) {
+        HashMap<String, Integer> registro = new HashMap<>();
+        sql = "SELECT foto_posterior FROM movimiento WHERE id_partida = ? AND foto_posterior IS NOT NULL ORDER BY id_movimiento";
+
+        Connection conn = conexion.establecerConexion();
+        if (conn == null) {
+            consola.mensaje("No se pudo conectar a la base de datos.");
+            return registro;
+        }
+
+        try (conn;
+            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPartida);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                String foto = rs.getString("foto_posterior");
+                registro.put(foto, registro.getOrDefault(foto, 0) + 1);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al cargar posiciones: " + e.getMessage());
+        }
+        return registro;
     }
 }
         
