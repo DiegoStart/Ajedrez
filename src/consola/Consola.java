@@ -38,13 +38,14 @@ public class Consola {
     // =========================
 
     public void mostrarMenuPrincipal() {
-        System.out.println("+----+-----------------------+");
-        System.out.println("|   Bienvenido al ajedrez    |");
-        System.out.println("+----+-----------------------+");
-        System.out.println("| 1  | Nueva partida         |");
-        System.out.println("| 2  | Cargar partida        |");
-        System.out.println("| 0  | Salir del juego       |");
-        System.out.println("+----+-----------------------+");
+        System.out.println("+----+-------------------------+");
+        System.out.println("|   Bienvenido al ajedrez      |");
+        System.out.println("+----+-------------------------+");
+        System.out.println("| 1  | Nueva partida           |");
+        System.out.println("| 2  | Cargar partida          |");
+        System.out.println("| 3  | Historial de partida    |");
+        System.out.println("| 0  | Salir del juego         |");
+        System.out.println("+----+-------------------------+");
     }
 
     public void mostrarMenuJugador() {
@@ -65,6 +66,7 @@ public class Consola {
         System.out.printf("| N  | %-24s |\n", negro);
         System.out.println("+----+--------------------------+");
         System.out.println("¿Están listos para jugar?");
+        System.out.println();
     }
 
     public void mostrarMenuPromocion() {
@@ -162,6 +164,7 @@ public class Consola {
     public void sinPartidasGuardadas() {
         System.out.println("|   --      No hay partidas guardadas      --    |");
         System.out.println("+----+------------------------------+------------+");
+        System.out.println();
     }
 
     public void piePartidasGuardadas() {
@@ -175,22 +178,23 @@ public class Consola {
     // =========================
 
     public void encabezadoMovimientos() {
-        System.out.println("+-----+--------+----------+----------+----------+----------------+");
-        System.out.println("| No. | Color  | Origen   | Destino  | Pieza    | Captura        |");
-        System.out.println("+-----+--------+----------+----------+----------+----------------+");
+        System.out.println("+-----+--------+----------+----------+----------+----------------+----------------+");
+        System.out.println("| No. | Color  | Origen   | Destino  | Pieza    | Captura        | Notación       |");
+        System.out.println("+-----+--------+----------+----------+----------+----------------+----------------+");
     }
 
-    public void filaMovimiento(int numero, String color, String origen, String destino, String pieza, String captura) {
-        System.out.printf("| %-3d | %-6s | %-8s | %-8s | %-8s | %-14s |%n",
-                numero, color, origen, destino, pieza, captura);
+    public void filaMovimiento(int numero, String color, String origen, String destino, String pieza, String captura, String notacionAlgebraica) {
+        System.out.printf("| %-3d | %-6s | %-8s | %-8s | %-8s | %-14s | %-14s |%n",
+                numero, color, origen, destino, pieza, captura, notacionAlgebraica);
     }
 
     public void sinMovimientos() {
-        System.out.println("|             No hay movimientos registrados                    |");
+        System.out.println("|                      No hay movimientos registrados                      |");
     }
 
     public void pieMovimientos() {
-        System.out.println("+-----+--------+----------+----------+----------+----------------+");
+        System.out.println("+-----+--------+----------+----------+----------+----------------+----------------+");
+        System.out.println();
     }
 
     // =========================

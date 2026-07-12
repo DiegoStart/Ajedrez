@@ -230,7 +230,11 @@ public class AjedrezConsulta {
     }
 
     public void eliminarPartidas(int idPartida) {
-        mostrarPartidasGuardadas();
+        if (!mostrarPartidasEnCurso()) {
+            return;
+        } else if (!mostrarPartidasFinalizadas()) {
+            return;
+        }
         sql = "DELETE FROM partida WHERE id_partida = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
@@ -247,7 +251,7 @@ public class AjedrezConsulta {
         }
     }
 
-    public boolean mostrarPartidasGuardadas() {
+    public boolean mostrarPartidasEnCurso() {
         boolean hayPartidas = false;
         sql = "SELECT p.id_partida, p.estado, jb.nombre AS blanco, jn.nombre AS negro FROM partida p " +
             "JOIN tablero t ON p.id_partida = t.id_partida JOIN jugador jb ON p.id_jugador_blanco = jb.id_jugador " +
@@ -275,7 +279,45 @@ public class AjedrezConsulta {
                 consola.filaPartida(idPartida, partida, estado);
                 hayPartidas = true;
             }
+            if (!hayPartidas) {
+                consola.sinPartidasGuardadas();
+                return false;
+            }
+            consola.piePartidasGuardadas();
+        } catch (SQLException e) {
+            System.out.println("Error al mostrar partidas guardadas: " + e.getMessage());
+        }   
+        return true;
+    }
 
+    public boolean mostrarPartidasFinalizadas() {
+        boolean hayPartidas = false;
+        sql = "SELECT p.id_partida, p.estado, jb.nombre AS blanco, jn.nombre AS negro FROM partida p " +
+            "JOIN tablero t ON p.id_partida = t.id_partida JOIN jugador jb ON p.id_jugador_blanco = jb.id_jugador " +
+            "JOIN jugador jn ON p.id_jugador_negro = jn.id_jugador WHERE p.estado = 'Finalizada' ORDER BY p.id_partida";
+
+        consola.encabezadoPartidasGuardadas();
+        Connection conn = conexion.establecerConexion();
+
+        if (conn == null) {
+            consola.mensaje("No se pudo conectar a la base de datos.");
+            return false;
+        }
+
+        try (conn;
+            Statement st = conn.createStatement();
+            ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                int idPartida = rs.getInt("id_partida");
+                String estado = rs.getString("estado");
+                String blanco = rs.getString("blanco");
+                String negro = rs.getString("negro");
+                String partida = blanco + " vs " + negro;
+
+                consola.filaPartida(idPartida, partida, estado);
+                hayPartidas = true;
+            }
             if (!hayPartidas) {
                 consola.sinPartidasGuardadas();
                 return false;
@@ -320,7 +362,7 @@ public class AjedrezConsulta {
 
     public void mostrarMovimientos(int idPartida) {
         boolean hayMovimientos = false;
-        sql = "SELECT numero_movimiento, color, origen, destino, pieza, pieza_capturada " +
+        sql = "SELECT numero_movimiento, color, origen, destino, pieza, pieza_capturada, notacion_algebraica " +
             "FROM movimiento WHERE id_partida = ? ORDER BY numero_movimiento, id_movimiento";
 
         consola.encabezadoMovimientos();
@@ -334,7 +376,6 @@ public class AjedrezConsulta {
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida);
             ResultSet rs = pstmt.executeQuery();
-
             while (rs.next()) {
                 int numeroMovimiento = rs.getInt("numero_movimiento");
                 String color = rs.getString("color");
@@ -342,14 +383,14 @@ public class AjedrezConsulta {
                 String destino = rs.getString("destino");
                 String pieza = rs.getString("pieza");
                 String piezaCapturada = rs.getString("pieza_capturada");
+                String notacionAlgebraica = rs.getString("notacion_algebraica");
 
                 if (piezaCapturada == null) {
                     piezaCapturada = "-";
                 }
-                consola.filaMovimiento(numeroMovimiento, color, origen, destino, pieza, piezaCapturada);
+                consola.filaMovimiento(numeroMovimiento, color, origen, destino, pieza, piezaCapturada, notacionAlgebraica);
                 hayMovimientos = true;
             }
-
             if (!hayMovimientos) {
                 consola.sinMovimientos();
             }

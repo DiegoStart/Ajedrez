@@ -22,7 +22,7 @@ public class AjedrezAlpha {
                     cargarPartida(consulta, consola);
                     break;
                 case 3:
-                    mostrarMovimientos(consulta);
+                    historialMovimientos(consulta);
                     break;
             }
         }
@@ -57,31 +57,27 @@ public class AjedrezAlpha {
     private static void cargarPartida(AjedrezConsulta consulta, Consola consola) {
         int idPartida = 0;
 
-        if (consulta.mostrarPartidasGuardadas()) {
+        if (consulta.mostrarPartidasEnCurso()) {
             idPartida = Excepciones.leerNumero("Elige una partida", 0, 30);
         }
-
         if (idPartida == 0) {
             return;
         }
-
         Tablero tablero = consulta.cargarPartida(idPartida);
         if (tablero != null) {
             jugarPartida(consulta, consola, tablero, idPartida);
         }
     }
 
-    private static void mostrarMovimientos(AjedrezConsulta consulta) {
+    private static void historialMovimientos(AjedrezConsulta consulta) {
         int idPartida = 0;
 
-        if (consulta.mostrarPartidasGuardadas()) {
+        if (consulta.mostrarPartidasFinalizadas()) {
             idPartida = Excepciones.leerNumero("Elige una partida", 0, 30);
         }
-
         if (idPartida == 0) {
             return;
         }
-
         consulta.mostrarMovimientos(idPartida);
     }
 
