@@ -1,5 +1,7 @@
 package consola;
 
+import java.util.List;
+
 import core.*;
 import persistencia.*;
 
@@ -10,7 +12,7 @@ public class AjedrezAlpha {
 
         while (true) {
             consola.mostrarMenuPrincipal();
-            int opcion = Excepciones.leerNumero("Elige una opción", 0, 3);
+            int opcion = Excepciones.leerNumero("Elige una opción", 0, 4);
             switch (opcion) {
                 case 0:
                     consola.mensaje("Saliendo....... Gracias por jugar.");
@@ -23,6 +25,9 @@ public class AjedrezAlpha {
                     break;
                 case 3:
                     historialMovimientos(consulta);
+                    break;
+                case 4:
+                    recrearPartida(consulta, consola);
                     break;
             }
         }
@@ -79,6 +84,22 @@ public class AjedrezAlpha {
             return;
         }
         consulta.mostrarMovimientos(idPartida);
+    }
+
+    private static void recrearPartida(AjedrezConsulta consulta, Consola consola) {
+        int idPartida = 0;
+
+        if (consulta.mostrarPartidasFinalizadas()) {
+            idPartida = Excepciones.leerNumero("Elige una partida", 0, 30);
+        }
+        if (idPartida == 0) {
+            return;
+        }
+        Tablero tablero = new Tablero(null, null);
+        List<Informe> historial = consulta.obtenerHistorial(idPartida);
+        if (historial != null) {
+            recrear(tablero, historial, consulta.obtenerJugadores(idPartida), consola);
+        }
     }
 
     private static void jugarPartida(AjedrezConsulta consulta, Consola consola, Tablero tablero, int partida) {
@@ -286,6 +307,51 @@ public class AjedrezAlpha {
         } catch (Exception e) {
             consola.mensaje("Clase AjedrezAlpha: Aprende a jugar.");
             return;
+        }
+    }
+
+    private static void recrear(Tablero tablero, List<Informe> historial, String[] jugadores, Consola consola) {
+        consola.setTablero(tablero);
+        consola.mostrarInformacionPartida(jugadores[0], jugadores[1], jugadores[2], jugadores[3]);
+        int index = 0;
+
+        while (index < historial.size()) {
+            Informe informe = historial.get(index);
+            tablero.restaurarPartida(informe.getFotoPosterior());
+            tablero.setUltimoMovimiento(informe.ultimoMovimiento());
+            consola.mensaje("Movimiento #"+ informe.getNumeroMovimiento() + " - " + informe.getNotacionAlgebraica());
+            consola.mensaje(informe.descripcion(jugadores[0], jugadores[1]));
+            consola.mostrarTablero();
+
+            int opcion = 0;
+            if (index == 0) {
+                opcion = Excepciones.leerNumero("[1] Siguiente [3] Ir al inicio [4] Ir al final [5] Salir", 1, 5);
+            } else if (index == historial.size() - 1) {
+                consola.mensaje("Fin de la partida.");
+                opcion = Excepciones.leerNumero("[5] Salir", 5, 5);
+            } else {
+                opcion = Excepciones.leerNumero("[1] Siguiente [2] Anterior [3] Ir al inicio [4] Ir al final [5] Salir", 1, 5);
+            }   
+            switch (opcion) {
+                case 1:
+                    if (index < historial.size() - 1) {
+                        index++;
+                    }
+                    break;
+                case 2:
+                    if (index > 0) {
+                        index--;
+                    }
+                    break;
+                case 3:
+                    index = 0;
+                    break;
+                case 4:
+                    index = historial.size() - 1;
+                    break;
+                case 5:
+                    return;
+            }
         }
     }
 }

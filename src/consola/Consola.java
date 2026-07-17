@@ -44,6 +44,7 @@ public class Consola {
         System.out.println("| 1  | Nueva partida           |");
         System.out.println("| 2  | Cargar partida          |");
         System.out.println("| 3  | Historial de partida    |");
+        System.out.println("| 4  | Recrear partida         |");
         System.out.println("| 0  | Salir del juego         |");
         System.out.println("+----+-------------------------+");
     }
@@ -78,6 +79,21 @@ public class Consola {
         System.out.println("|  3  | Caballo          |");
         System.out.println("|  4  | Reina            |");
         System.out.println("+-----+------------------+");
+    }
+
+    public void mostrarInformacionPartida(String blancas, String negras, String resultado, String causa) {
+        System.out.println("========================================");
+        System.out.println("         MODO REPRODUCCIÓN");
+        System.out.println("========================================");
+        System.out.println("Blancas : " + blancas);
+        System.out.println("Negras  : " + negras);
+        System.out.println("Resultado: " + resultado);
+
+        if (causa != null) {
+            System.out.println("Causa   : " + causa);
+        }
+        System.out.println("========================================");
+        System.out.println();
     }
 
     // =========================

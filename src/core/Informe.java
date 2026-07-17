@@ -21,6 +21,7 @@ public class Informe {
     private String mensaje;
     private String fotoPosterior;
     private String causaTablas;
+    private String notacionAlgebraica;
     private char piezaPromocion;
     private List<int[]> candidatas;
 
@@ -194,6 +195,37 @@ public class Informe {
         return piezaPromocion;
     }
 
+    public int[] ultimoMovimiento() {
+        if (pieza.equals("Peon") && Math.abs(filaDestino - filaOrigen) == 2) {
+            return new int[] {filaOrigen, colOrigen, filaDestino, colDestino};
+        }
+        return null;
+    }
+    
+    public String descripcion(String blancas, String negras) {
+        String jugador = esBlanca ? blancas : negras;
+
+        if (jaqueMate) {
+            return jugador + " dio jaque mate.";
+        }
+        if (jaque) {
+            return jugador + " dio jaque.";
+        }
+        if (enroqueLargoCorto) {
+            return jugador + " realizó un " + (colDestino == 6 ? "enroque corto." : "enroque largo.");
+        }
+        if (promocionPeon) {
+            return jugador + " promovió un peón a " + piezaPromocion + ".";
+        }
+        if (capturaAlPaso) {
+            return jugador + " capturó al paso.";
+        }
+        if (captura) {
+            return jugador + " capturó un " + piezaCapturada + ".";
+        }
+        return jugador + " jugó " + notacionAlgebraica() + ".";
+    }
+
     public void setCadidatas(int[] candidata) { 
         this.candidatas.add(candidata); 
     }
@@ -246,40 +278,47 @@ public class Informe {
         }
     }
 
+    public void setNotacionAlgebraica(String notacionAlgebraica) {
+        this.notacionAlgebraica = notacionAlgebraica;
+    }
+
+    public String getNotacionAlgebraica() {
+        return notacionAlgebraica;
+    }
+
     public String notacionAlgebraica() {
-        String notacion;
         String desambiguacion = Desambiguacion();
         char columnaDestino = (char) ('a' + colDestino);
         char columnaOrigen = (char) ('a' + colOrigen);
         int fila = 8 - filaDestino;
 
         if (enroqueLargoCorto) {
-            notacion = colDestino == 6 ? "O-O" : "O-O-O";
+            notacionAlgebraica = colDestino == 6 ? "O-O" : "O-O-O";
         } else if (capturaAlPaso) {
-            notacion = "" + columnaOrigen + "x" + columnaDestino + fila;
+            notacionAlgebraica = "" + columnaOrigen + "x" + columnaDestino + fila;
         } else if (promocionPeon) {
             if (captura) {
-                notacion = "" + columnaOrigen + "x" + columnaDestino + fila + "=" + piezaPromocion;
+                notacionAlgebraica = "" + columnaOrigen + "x" + columnaDestino + fila + "=" + piezaPromocion;
             } else {
-                notacion = "" + columnaDestino + fila + "=" + piezaPromocion;
+                notacionAlgebraica = "" + columnaDestino + fila + "=" + piezaPromocion;
             }
         } else if (captura) {
             if (pieza.equals("Peon")) {
-                notacion = "" + columnaOrigen + "x" + columnaDestino + fila;
+                notacionAlgebraica = "" + columnaOrigen + "x" + columnaDestino + fila;
             } else {
-                notacion = inicialPieza() + desambiguacion + "x" + columnaDestino + fila;
+                notacionAlgebraica = inicialPieza() + desambiguacion + "x" + columnaDestino + fila;
             }  
         } else if (pieza.equals("Peon")) {
-            notacion = "" + columnaDestino + fila;
+            notacionAlgebraica = "" + columnaDestino + fila;
         } else {
-            notacion = inicialPieza() + desambiguacion + columnaDestino + fila;
+            notacionAlgebraica = inicialPieza() + desambiguacion + columnaDestino + fila;
         }
 
         if (jaqueMate) {
-            notacion += "#";
+            notacionAlgebraica += "#";
         } else if (jaque) {
-            notacion += "+";
+            notacionAlgebraica += "+";
         }
-        return notacion;
+        return notacionAlgebraica;
     }
 }

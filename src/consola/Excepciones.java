@@ -25,12 +25,10 @@ public class Excepciones {
                 } else {
                     consola.mensaje("Error: Ingresa una opción válida.");
                 }
-
             } catch (NumberFormatException e) {
                 consola.mensaje("Error: Ingresa un número entero válido.");
             }
         }
-
         return numero;
     }
 
@@ -42,7 +40,6 @@ public class Excepciones {
     public static String leerNombre(String nombre) {
         String texto = "";
         boolean valido = false;
-
         String[] palabrasProhibidas = {
             "PENE", "PUTA", "VERGA", "CULO", "MAMADA", "VAGINA"
         };
@@ -50,30 +47,25 @@ public class Excepciones {
         while (!valido) {
             texto = leerString(nombre).trim();
             String textoNormalizado = texto.toUpperCase();
-
             if (texto.matches("[a-zA-ZñÑáéíóúÁÉÍÓÚ\\s]+") &&
                 texto.replaceAll("\\s+", "").length() >= 3) {
 
                 boolean contieneProhibida = false;
-
                 for (String prohibida : palabrasProhibidas) {
                     if (textoNormalizado.contains(prohibida)) {
                         contieneProhibida = true;
                         break;
                     }
                 }
-
                 if (contieneProhibida) {
                     consola.mensaje("Nombre no permitido. Se ha detectado lenguaje ofensivo. Intenta de nuevo.");
                 } else {
                     valido = true;
                 }
-
             } else {
                 consola.mensaje("Error: Solo se permiten letras y debe tener al menos 3 caracteres.");
             }
         }
-
         return texto;
     }
 
@@ -113,14 +105,12 @@ public class Excepciones {
                 if (partes.length == 2 &&
                     esCasillaValida(partes[0]) &&
                     esCasillaValida(partes[1])) {
-
                     valido = true;
                 } else {
                     consola.mensaje("Error: Ingresa un movimiento válido (ej: E2 E4) o escribe MENU, RENDIRSE, TABLAS, ACEPTO o RECHAZO.");
                 }
             }
         }
-
         return partes;
     }
 
@@ -131,7 +121,6 @@ public class Excepciones {
 
         char letra = Character.toUpperCase(casilla.charAt(0));
         char numero = casilla.charAt(1);
-
         return letra >= 'A' && letra <= 'H' && numero >= '1' && numero <= '8';
     }
 

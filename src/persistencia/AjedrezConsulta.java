@@ -7,7 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class AjedrezConsulta {
     Conexion conexion = new Conexion();
@@ -22,11 +24,9 @@ public class AjedrezConsulta {
             return -1;
         }
 
-        try (conn;
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, nombre);
             ResultSet rs = pstmt.executeQuery();
-
             if (rs.next()) {
                 return rs.getInt("id_jugador");
             }
@@ -44,12 +44,10 @@ public class AjedrezConsulta {
             return -1;
         }
         
-        try (conn;
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idBlanco);
             pstmt.setInt(2, idNegro);
             ResultSet rs = pstmt.executeQuery();
-
             if (rs.next()) {
                 return rs.getInt("id_partida");
             }
@@ -62,15 +60,13 @@ public class AjedrezConsulta {
     public int registrarMovimiento(int idPartida, Informe informe) {
         sql = "INSERT INTO movimiento (id_partida, numero_movimiento, color, origen, destino, pieza, " +
             "pieza_capturada, tipo_movimiento, jaque, jaque_mate, causa_tablas, notacion_algebraica, pieza_promocion, foto_posterior) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_movimiento";
-
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
             return -1;
         }
 
-        try (conn;
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida);
             pstmt.setInt(2, informe.getNumeroMovimiento());
             pstmt.setString(3, informe.getColorTexto());
@@ -102,15 +98,13 @@ public class AjedrezConsulta {
 
     public void actualizarPartida(int idPartida, String estado, String resultado, String causa) {
         sql = "UPDATE partida SET estado = ?, resultado = ?, causa_finalizacion = ?, fecha_fin = CURRENT_TIMESTAMP WHERE id_partida = ?";
-   
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
             return;
         }
 
-        try (conn;
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, estado);
             pstmt.setString(2, resultado);
             pstmt.setString(3, causa);
@@ -126,8 +120,7 @@ public class AjedrezConsulta {
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id_partida) DO UPDATE SET tablero_actual = EXCLUDED.tablero_actual, " +
             "turno_actual = EXCLUDED.turno_actual, tiempo_blancas = EXCLUDED.tiempo_blancas, tiempo_negras = EXCLUDED.tiempo_negras, ultimo_movimiento = EXCLUDED.ultimo_movimiento, " +
             "contador_movimientos = EXCLUDED.contador_movimientos, cincuenta_movimientos = EXCLUDED.cincuenta_movimientos";
-
-      Connection conn = conexion.establecerConexion();
+        Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
             return;
@@ -138,8 +131,7 @@ public class AjedrezConsulta {
             movimiento = ultimoMovimiento[0] + "," + ultimoMovimiento[1] + "," + ultimoMovimiento[2] + "," + ultimoMovimiento[3];
         }
 
-        try (conn;
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, idPartida);
                 pstmt.setString(2, tablero);
                 pstmt.setString(3, turnoActual);
@@ -158,51 +150,48 @@ public class AjedrezConsulta {
         sql = "SELECT t.tablero_actual, t.turno_actual, t.tiempo_blancas, t.tiempo_negras, t.ultimo_movimiento, t.contador_movimientos, t.cincuenta_movimientos, " +
             "jb.nombre AS blanco, jn.nombre AS negro FROM tablero t JOIN partida p ON t.id_partida = p.id_partida JOIN jugador jb ON p.id_jugador_blanco = jb.id_jugador JOIN jugador jn ON p.id_jugador_negro = jn.id_jugador " +
             "WHERE t.id_partida = ? AND p.estado = 'En curso'";
-        
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
             return null;
         }
 
-        try (conn;
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, idPartida);
-                ResultSet rs = pstmt.executeQuery();
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPartida);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                String respaldo = rs.getString("tablero_actual");
+                String turno = rs.getString("turno_actual");
+                int tiempoBlancas = rs.getInt("tiempo_blancas");
+                int tiempoNegras = rs.getInt("tiempo_negras");
+                String ultimoMovimientoTexto = rs.getString("ultimo_movimiento");
+                int contadorMovimientos = rs.getInt("contador_movimientos");
+                int cincuentaMovimientos = rs.getInt("cincuenta_movimientos");
 
-                if (rs.next()) {
-                    String respaldo = rs.getString("tablero_actual");
-                    String turno = rs.getString("turno_actual");
-                    int tiempoBlancas = rs.getInt("tiempo_blancas");
-                    int tiempoNegras = rs.getInt("tiempo_negras");
-                    String ultimoMovimientoTexto = rs.getString("ultimo_movimiento");
-                    int contadorMovimientos = rs.getInt("contador_movimientos");
-                    int cincuentaMovimientos = rs.getInt("cincuenta_movimientos");
+                String nombreBlanco = rs.getString("blanco");
+                String nombreNegro = rs.getString("negro");
+                Jugador blanco = new Jugador(nombreBlanco, true);
+                Jugador negro = new Jugador(nombreNegro, false);
 
-                    String nombreBlanco = rs.getString("blanco");
-                    String nombreNegro = rs.getString("negro");
-                    Jugador blanco = new Jugador(nombreBlanco, true);
-                    Jugador negro = new Jugador(nombreNegro, false);
-
-                    Tablero tablero = new Tablero(blanco, negro);
-                    tablero.restaurarPartida(respaldo);
-                    int[] ultimoMovimiento = null;
-                    if (ultimoMovimientoTexto != null && !ultimoMovimientoTexto.equals("-1,-1,-1,-1")) {
-                        String[] partes = ultimoMovimientoTexto.split(",");           
-                        ultimoMovimiento = new int[4];
-                        ultimoMovimiento[0] = Integer.parseInt(partes[0]);
-                        ultimoMovimiento[1] = Integer.parseInt(partes[1]);
-                        ultimoMovimiento[2] = Integer.parseInt(partes[2]);
-                        ultimoMovimiento[3] = Integer.parseInt(partes[3]);
-                    }
-                    tablero.restaurarEstado(turno.equals("Blanco"), ultimoMovimiento, tiempoBlancas, tiempoNegras, contadorMovimientos, cincuentaMovimientos);
-                    HashMap<String, Integer> registro = cargarFotosPosteriores(idPartida);
-                    tablero.restaurarRegistro(registro);
-                    return tablero;
-                } else {
-                    consola.mensaje("La partida no existe o ya fue finalizada.");
-                    return null;
+                Tablero tablero = new Tablero(blanco, negro);
+                tablero.restaurarPartida(respaldo);
+                int[] ultimoMovimiento = null;
+                if (ultimoMovimientoTexto != null && !ultimoMovimientoTexto.equals("-1,-1,-1,-1")) {
+                    String[] partes = ultimoMovimientoTexto.split(",");           
+                    ultimoMovimiento = new int[4];
+                    ultimoMovimiento[0] = Integer.parseInt(partes[0]);
+                    ultimoMovimiento[1] = Integer.parseInt(partes[1]);
+                    ultimoMovimiento[2] = Integer.parseInt(partes[2]);
+                    ultimoMovimiento[3] = Integer.parseInt(partes[3]);
                 }
+                tablero.restaurarEstado(turno.equals("Blanco"), ultimoMovimiento, tiempoBlancas, tiempoNegras, contadorMovimientos, cincuentaMovimientos);
+                HashMap<String, Integer> registro = cargarFotosPosteriores(idPartida);
+                tablero.restaurarRegistro(registro);
+                return tablero;
+            } else {
+                consola.mensaje("La partida no existe o ya fue finalizada.");
+                return null;
+            }
         } catch (SQLException e) {
             System.out.println("Error al cargar tablero: " + e.getMessage());
         }
@@ -220,8 +209,7 @@ public class AjedrezConsulta {
             return;
         }
 
-        try (conn;
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida); 
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -242,8 +230,7 @@ public class AjedrezConsulta {
             return;
         }
 
-        try (conn;
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida); 
             pstmt.executeUpdate();
         } catch (SQLException e) {
@@ -256,26 +243,20 @@ public class AjedrezConsulta {
         sql = "SELECT p.id_partida, p.estado, jb.nombre AS blanco, jn.nombre AS negro FROM partida p " +
             "JOIN tablero t ON p.id_partida = t.id_partida JOIN jugador jb ON p.id_jugador_blanco = jb.id_jugador " +
             "JOIN jugador jn ON p.id_jugador_negro = jn.id_jugador WHERE p.estado = 'En curso' ORDER BY p.id_partida";
-
         consola.encabezadoPartidasGuardadas();
         Connection conn = conexion.establecerConexion();
-
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
             return false;
         }
 
-        try (conn;
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql)) {
-
+        try (conn; Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 int idPartida = rs.getInt("id_partida");
                 String estado = rs.getString("estado");
                 String blanco = rs.getString("blanco");
                 String negro = rs.getString("negro");
                 String partida = blanco + " vs " + negro;
-
                 consola.filaPartida(idPartida, partida, estado);
                 hayPartidas = true;
             }
@@ -295,26 +276,20 @@ public class AjedrezConsulta {
         sql = "SELECT p.id_partida, p.estado, jb.nombre AS blanco, jn.nombre AS negro FROM partida p " +
             "JOIN tablero t ON p.id_partida = t.id_partida JOIN jugador jb ON p.id_jugador_blanco = jb.id_jugador " +
             "JOIN jugador jn ON p.id_jugador_negro = jn.id_jugador WHERE p.estado = 'Finalizada' ORDER BY p.id_partida";
-
         consola.encabezadoPartidasGuardadas();
         Connection conn = conexion.establecerConexion();
-
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
             return false;
         }
 
-        try (conn;
-            Statement st = conn.createStatement();
-            ResultSet rs = st.executeQuery(sql)) {
-
+        try (conn; Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 int idPartida = rs.getInt("id_partida");
                 String estado = rs.getString("estado");
                 String blanco = rs.getString("blanco");
                 String negro = rs.getString("negro");
                 String partida = blanco + " vs " + negro;
-
                 consola.filaPartida(idPartida, partida, estado);
                 hayPartidas = true;
             }
@@ -332,10 +307,8 @@ public class AjedrezConsulta {
     public void mostrarJugadores() {
         boolean hayJugadores = false;
         sql = "SELECT * FROM jugador ORDER BY id_jugador";
-
         consola.encabezadoJugadores();
         Connection conn = conexion.establecerConexion();
-
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
             return;
@@ -345,11 +318,9 @@ public class AjedrezConsulta {
             while (rs.next()) {
                 int idJugador = rs.getInt("id_jugador");
                 String nombre = rs.getString("nombre");
-
                 consola.filaJugador(idJugador, nombre);
                 hayJugadores = true;
             }
-
             if (!hayJugadores) {
                 consola.sinJugadores();
                 return;
@@ -364,10 +335,8 @@ public class AjedrezConsulta {
         boolean hayMovimientos = false;
         sql = "SELECT numero_movimiento, color, origen, destino, pieza, pieza_capturada, notacion_algebraica " +
             "FROM movimiento WHERE id_partida = ? ORDER BY numero_movimiento, id_movimiento";
-
         consola.encabezadoMovimientos();
         Connection conn = conexion.establecerConexion();
-
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
             return;
@@ -403,15 +372,13 @@ public class AjedrezConsulta {
     public HashMap<String, Integer> cargarFotosPosteriores(int idPartida) {
         HashMap<String, Integer> registro = new HashMap<>();
         sql = "SELECT foto_posterior FROM movimiento WHERE id_partida = ? AND foto_posterior IS NOT NULL ORDER BY id_movimiento";
-
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
             return registro;
         }
 
-        try (conn;
-            PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -423,5 +390,65 @@ public class AjedrezConsulta {
         }
         return registro;
     }
+
+    public List<Informe> obtenerHistorial(int idPartida) {
+        List<Informe> historial = new ArrayList<>();
+        sql = "SELECT numero_movimiento, color, pieza, origen, destino, pieza_capturada, foto_posterior, " +
+            "jaque, jaque_mate, causa_tablas, notacion_algebraica FROM movimiento WHERE id_partida = ? ORDER BY id_movimiento";
+        Connection conn = conexion.establecerConexion();
+        if (conn == null) {
+            consola.mensaje("No se pudo conectar a la base de datos.");
+            return historial;
+        }
+
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPartida);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                int filaOrigen = 8 - Character.getNumericValue(rs.getString("origen").charAt(1));
+                int colOrigen = rs.getString("origen").charAt(0) - 'A';
+                int filaDestino = 8 - Character.getNumericValue(rs.getString("destino").charAt(1));
+                int colDestino = rs.getString("destino").charAt(0) - 'A';
+                Informe informe = new Informe(rs.getString("pieza"), rs.getString("color").equals("Blanco"), filaOrigen, colOrigen, filaDestino, colDestino);
+                informe.setNumeroMovimiento(rs.getInt("numero_movimiento"));
+                informe.setPiezaCapturada(rs.getString("pieza_capturada"));
+                informe.setFotoPosterior(rs.getString("foto_posterior"));
+                informe.setJaque(rs.getBoolean("jaque"));
+                informe.setJaqueMate(rs.getBoolean("jaque_mate"));
+                informe.setCausaTablas(rs.getString("causa_tablas"));
+                informe.setNotacionAlgebraica(rs.getString("notacion_algebraica"));
+                historial.add(informe);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error al cargar historial: " + e.getMessage());
+        }
+        return historial;
+    }
+
+    public String[] obtenerJugadores(int idPartida) {
+        String[] jugadores = new String[4];
+        sql = "SELECT jb.nombre AS blancas, jn.nombre AS negras, p.resultado, p.causa_finalizacion FROM partida p "
+            + "JOIN jugador jb ON p.id_jugador_blanco = jb.id_jugador JOIN jugador jn ON p.id_jugador_negro = jn.id_jugador WHERE p.id_partida = ?";
+
+        Connection conn = conexion.establecerConexion();
+        if (conn == null) {
+            consola.mensaje("No se pudo conectar a la base de datos.");
+            return jugadores;
+        }
+
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idPartida);
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                jugadores[0] = rs.getString("blancas");
+                jugadores[1] = rs.getString("negras");
+                jugadores[2] = rs.getString("resultado");
+                jugadores[3] = rs.getString("causa_finalizacion");
+            }
+        } catch (SQLException e) {
+            consola.mensaje("Error al obtener jugadores: " + e.getMessage());
+        }
+        return jugadores;
+    }
 }
-        
