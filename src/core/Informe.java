@@ -19,7 +19,7 @@ public class Informe {
     private boolean jaqueMate;
     private int numeroMovimiento;
     private String mensaje;
-    private String fotoPosterior;
+    private String fen;
     private String causaTablas;
     private String notacionAlgebraica;
     private char piezaPromocion;
@@ -167,12 +167,12 @@ public class Informe {
         return "Normal";
     }
 
-    public void setFotoPosterior(String fotoPosterior) {
-        this.fotoPosterior = fotoPosterior;
+    public void setFEN(String fen) {
+        this.fen = fen;
     }
 
-    public String getFotoPosterior() {
-        return fotoPosterior;
+    public String getFEN() {
+        return fen;
     }
 
     public void setCausaTablas(String causaTablas) {
@@ -262,15 +262,15 @@ public class Informe {
     private String inicialPieza() {
         switch (pieza) {
             case "Rey":
-                return "R";
+                return "K";
             case "Reina":
-                return "D";
+                return "Q";
             case "Torre":
-                return "T";
+                return "R";
             case "Alfil":
-                return "A";
+                return "B";
             case "Caballo":
-                return "C";
+                return "N";
             case "Peon":
                 return "";
             default:

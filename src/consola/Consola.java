@@ -38,13 +38,15 @@ public class Consola {
     // =========================
 
     public void mostrarMenuPrincipal() {
-        System.out.println("+----+-------------------------+");
+        System.out.println("+------------------------------+");
         System.out.println("|   Bienvenido al ajedrez      |");
         System.out.println("+----+-------------------------+");
         System.out.println("| 1  | Nueva partida           |");
         System.out.println("| 2  | Cargar partida          |");
         System.out.println("| 3  | Historial de partida    |");
         System.out.println("| 4  | Recrear partida         |");
+        System.out.println("| 5  | Exportar PGN            |");
+        System.out.println("| 6  | Estadisticas            |");
         System.out.println("| 0  | Salir del juego         |");
         System.out.println("+----+-------------------------+");
     }
@@ -92,6 +94,21 @@ public class Consola {
         if (causa != null) {
             System.out.println("Causa   : " + causa);
         }
+        System.out.println("========================================");
+        System.out.println();
+    }
+
+    public void mostrarEstadisticasJugador(int idJugador, String nombre, int elo, int ganadas, int perdidas, int tablas) {
+        System.out.println("========================================");
+        System.out.println("         MODO ESTADISTICO");
+        System.out.println("========================================");
+        System.out.println("Nombre: " + nombre);
+        System.out.println("Id: " + idJugador);
+        System.out.println("ELO: " + elo);
+        System.out.println("Ganadas: " + ganadas);
+        System.out.println("Perdidas: " + perdidas);
+        System.out.println("Tablas: " + tablas);
+
         System.out.println("========================================");
         System.out.println();
     }
@@ -218,23 +235,22 @@ public class Consola {
     // =========================
 
     public void encabezadoJugadores() {
-        System.out.println("+----+-------------------------+");
-        System.out.println("| ID | Jugador                 |");
-        System.out.println("+----+-------------------------+");
+        System.out.println("+----+------------------------------+");
+        System.out.println("| ID | Nombre                       |");
+        System.out.println("+----+------------------------------+");
     }
 
     public void filaJugador(int idJugador, String nombre) {
-        System.out.printf("| %-2d | %-28s |%n", idJugador, nombre);
+        System.out.printf("| %-2d | %-28s |\n", idJugador, nombre);
     }
 
     public void sinJugadores() {
-        System.out.println("|   --     No hay jugadores registrados     --   |");
-        System.out.println("+----+------------------------------+------------+");
+        System.out.println("| -- | No hay jugadores registrados |");
     }
 
     public void pieJugadores() {
-        System.out.println("+----+------------------------------+------------+");
-        System.out.println("| 0  | Regresar                                  |");
-        System.out.println("+----+------------------------------+------------+");
+        System.out.println("+----+------------------------------+");
+        System.out.println("| 0  | Regresar                     |");
+        System.out.println("+----+------------------------------+");
     }
 }

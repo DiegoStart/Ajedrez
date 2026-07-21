@@ -17,7 +17,7 @@ public class AjedrezConsulta {
     String sql = "";
 
     public int registrarJugador(String nombre) {
-        sql = "INSERT INTO jugador (nombre) VALUES (?) RETURNING id_jugador";
+        sql = "INSERT INTO jugador (nombre, elo, ganadas, perdidas, tablas) VALUES (?, ?, ?, ?, ?) RETURNING id_jugador";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
@@ -26,6 +26,10 @@ public class AjedrezConsulta {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, nombre);
+            pstmt.setInt(2, 2403);
+            pstmt.setInt(3, 1);
+            pstmt.setInt(4, 2);
+            pstmt.setInt(5, 3);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt("id_jugador");
@@ -37,7 +41,7 @@ public class AjedrezConsulta {
     }
 
     public int registrarPartida(int idBlanco, int idNegro) {
-        sql = "INSERT INTO partida (id_jugador_blanco, id_jugador_negro) VALUES (?, ?) RETURNING id_partida";
+        sql = "INSERT INTO partida (id_jugador_blanco, id_jugador_negro, time_control) VALUES (?, ?, ?) RETURNING id_partida";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
@@ -47,6 +51,7 @@ public class AjedrezConsulta {
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idBlanco);
             pstmt.setInt(2, idNegro);
+            pstmt.setInt(3, 600);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt("id_partida");
@@ -59,7 +64,7 @@ public class AjedrezConsulta {
 
     public int registrarMovimiento(int idPartida, Informe informe) {
         sql = "INSERT INTO movimiento (id_partida, numero_movimiento, color, origen, destino, pieza, " +
-            "pieza_capturada, tipo_movimiento, jaque, jaque_mate, causa_tablas, notacion_algebraica, pieza_promocion, foto_posterior) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_movimiento";
+            "pieza_capturada, tipo_movimiento, jaque, jaque_mate, causa_tablas, notacion_algebraica, pieza_promocion, fen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id_movimiento";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
@@ -84,7 +89,7 @@ public class AjedrezConsulta {
             } else {
                 pstmt.setNull(13, java.sql.Types.VARCHAR);
             }
-            pstmt.setString(14, informe.getFotoPosterior());
+            pstmt.setString(14, informe.getFEN());
 
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -97,7 +102,7 @@ public class AjedrezConsulta {
     }
 
     public void actualizarPartida(int idPartida, String estado, String resultado, String causa) {
-        sql = "UPDATE partida SET estado = ?, resultado = ?, causa_finalizacion = ?, fecha_fin = CURRENT_TIMESTAMP WHERE id_partida = ?";
+        sql = "UPDATE partida SET estado = ?, resultado = ?, causa_finalizacion = ?, fecha_fin = CURRENT_TIMESTAMP, duracion = ? WHERE id_partida = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
@@ -108,14 +113,15 @@ public class AjedrezConsulta {
             pstmt.setString(1, estado);
             pstmt.setString(2, resultado);
             pstmt.setString(3, causa);
-            pstmt.setInt(4, idPartida);
+            pstmt.setInt(4, 400);
+            pstmt.setInt(5, idPartida);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Error al actualizar estado de partida: " + e.getMessage());
         }
     }
 
-    public void guardarPartida(int idPartida, String tablero, boolean turno, int tiempoBlancas, int tiempoNegras, int[] ultimoMovimiento, int contadorMovimientos, int cincuentaMovimientos) {
+    public void guardarPartida(int idPartida, String fen, boolean turno, int tiempoBlancas, int tiempoNegras, int[] ultimoMovimiento, int contadorMovimientos, int cincuentaMovimientos) {
         sql = "INSERT INTO tablero (id_partida, tablero_actual, turno_actual, tiempo_blancas, tiempo_negras, ultimo_movimiento, contador_movimientos, cincuenta_movimientos) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id_partida) DO UPDATE SET tablero_actual = EXCLUDED.tablero_actual, " +
             "turno_actual = EXCLUDED.turno_actual, tiempo_blancas = EXCLUDED.tiempo_blancas, tiempo_negras = EXCLUDED.tiempo_negras, ultimo_movimiento = EXCLUDED.ultimo_movimiento, " +
@@ -133,7 +139,7 @@ public class AjedrezConsulta {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setInt(1, idPartida);
-                pstmt.setString(2, tablero);
+                pstmt.setString(2, fen);
                 pstmt.setString(3, turnoActual);
                 pstmt.setInt(4, tiempoBlancas);
                 pstmt.setInt(5, tiempoNegras);
@@ -185,7 +191,7 @@ public class AjedrezConsulta {
                     ultimoMovimiento[3] = Integer.parseInt(partes[3]);
                 }
                 tablero.restaurarEstado(turno.equals("Blanco"), ultimoMovimiento, tiempoBlancas, tiempoNegras, contadorMovimientos, cincuentaMovimientos);
-                HashMap<String, Integer> registro = cargarFotosPosteriores(idPartida);
+                HashMap<String, Integer> registro = cargarFENPosteriores(idPartida);
                 tablero.restaurarRegistro(registro);
                 return tablero;
             } else {
@@ -369,9 +375,9 @@ public class AjedrezConsulta {
         }
     }
 
-    public HashMap<String, Integer> cargarFotosPosteriores(int idPartida) {
+    public HashMap<String, Integer> cargarFENPosteriores(int idPartida) {
         HashMap<String, Integer> registro = new HashMap<>();
-        sql = "SELECT foto_posterior FROM movimiento WHERE id_partida = ? AND foto_posterior IS NOT NULL ORDER BY id_movimiento";
+        sql = "SELECT fen FROM movimiento WHERE id_partida = ? AND fen IS NOT NULL ORDER BY id_movimiento";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
@@ -382,8 +388,8 @@ public class AjedrezConsulta {
             pstmt.setInt(1, idPartida);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                String foto = rs.getString("foto_posterior");
-                registro.put(foto, registro.getOrDefault(foto, 0) + 1);
+                String fen = rs.getString("fen");
+                registro.put(fen, registro.getOrDefault(fen, 0) + 1);
             }
         } catch (SQLException e) {
             System.out.println("Error al cargar posiciones: " + e.getMessage());
@@ -393,7 +399,7 @@ public class AjedrezConsulta {
 
     public List<Informe> obtenerHistorial(int idPartida) {
         List<Informe> historial = new ArrayList<>();
-        sql = "SELECT numero_movimiento, color, pieza, origen, destino, pieza_capturada, foto_posterior, " +
+        sql = "SELECT numero_movimiento, color, pieza, origen, destino, pieza_capturada, fen, " +
             "jaque, jaque_mate, causa_tablas, notacion_algebraica FROM movimiento WHERE id_partida = ? ORDER BY id_movimiento";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
@@ -412,7 +418,7 @@ public class AjedrezConsulta {
                 Informe informe = new Informe(rs.getString("pieza"), rs.getString("color").equals("Blanco"), filaOrigen, colOrigen, filaDestino, colDestino);
                 informe.setNumeroMovimiento(rs.getInt("numero_movimiento"));
                 informe.setPiezaCapturada(rs.getString("pieza_capturada"));
-                informe.setFotoPosterior(rs.getString("foto_posterior"));
+                informe.setFEN(rs.getString("fen"));
                 informe.setJaque(rs.getBoolean("jaque"));
                 informe.setJaqueMate(rs.getBoolean("jaque_mate"));
                 informe.setCausaTablas(rs.getString("causa_tablas"));
@@ -425,15 +431,13 @@ public class AjedrezConsulta {
         return historial;
     }
 
-    public String[] obtenerJugadores(int idPartida) {
-        String[] jugadores = new String[4];
-        sql = "SELECT jb.nombre AS blancas, jn.nombre AS negras, p.resultado, p.causa_finalizacion FROM partida p "
-            + "JOIN jugador jb ON p.id_jugador_blanco = jb.id_jugador JOIN jugador jn ON p.id_jugador_negro = jn.id_jugador WHERE p.id_partida = ?";
-
+    public String[] obtenerInformacion(int idPartida) {
+        String[] informacion = new String[9];
+        sql = "SELECT jb.nombre AS blancas, jn.nombre AS negras, p.resultado, p.causa_finalizacion, jb.elo AS white_elo, jn.elo AS black_elo, p.time_control, TO_CHAR(p.fecha_inicio, 'YYYY.MM.DD') AS fecha, p.duracion FROM partida p JOIN jugador jb ON p.id_jugador_blanco = jb.id_jugador JOIN jugador jn ON p.id_jugador_negro = jn.id_jugador WHERE p.id_partida = ?;";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             consola.mensaje("No se pudo conectar a la base de datos.");
-            return jugadores;
+            return informacion;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -441,14 +445,116 @@ public class AjedrezConsulta {
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                jugadores[0] = rs.getString("blancas");
-                jugadores[1] = rs.getString("negras");
-                jugadores[2] = rs.getString("resultado");
-                jugadores[3] = rs.getString("causa_finalizacion");
+                informacion[0] = rs.getString("blancas");
+                informacion[1] = rs.getString("negras");
+                informacion[2] = rs.getString("resultado");
+                informacion[3] = rs.getString("causa_finalizacion");
+                informacion[4] = String.valueOf(rs.getInt("white_elo"));
+                informacion[5] = String.valueOf(rs.getInt("black_elo"));
+                informacion[6] = rs.getString("time_control");
+                informacion[7] = rs.getString("fecha");
+                informacion[8] = String.valueOf(rs.getInt("duracion"));
             }
         } catch (SQLException e) {
             consola.mensaje("Error al obtener jugadores: " + e.getMessage());
         }
-        return jugadores;
+        return informacion;
+    }
+
+    public String generarPGN(int idPartida) {
+        String[] informacion = obtenerInformacion(idPartida);
+        List<Informe> historial = obtenerHistorial(idPartida);
+        StringBuilder pgn = new StringBuilder();
+        // Seven Tag Roster (Obligatorios)
+        pgn.append("[Event \"Ajedrez Alpha\"]\n");
+        pgn.append("[Site \"Oaxaca, México\"]\n");
+        pgn.append("[Date \"" + (informacion[7] == null ? "?" : informacion[7]) + "\"]\n");
+        pgn.append("[Round \"?\"]\n");
+        pgn.append("[White \"" + informacion[0] + "\"]\n");
+        pgn.append("[Black \"" + informacion[1] + "\"]\n");
+        pgn.append("[Result \"" + informacion[2] + "\"]\n");
+        pgn.append("\n");
+        // Información adicional
+        pgn.append("[WhiteElo \"" + (informacion[4] == null ? "?" : informacion[4]) + "\"]\n");
+        pgn.append("[BlackElo \"" + (informacion[5] == null ? "?" : informacion[5]) + "\"]\n");
+        pgn.append("[WhiteTitle \"-\"]\n");
+        pgn.append("[BlackTitle \"-\"]\n");
+        pgn.append("[TimeControl \"" + (informacion[6] == null ? "?" : informacion[6]) + "\"]\n");
+        pgn.append("[Termination \"Normal\"]\n");
+        pgn.append("[Annotator \"Ajedrez Alpha\"]\n");
+        pgn.append("[ECO \"-\"]\n");
+        pgn.append("[Opening \"-\"]\n");
+        pgn.append("[Variation \"-\"]\n");
+        pgn.append("[PlyCount \"" + historial.size() + "\"]\n");
+        pgn.append("[SetUp \"0\"]\n");
+        pgn.append("[Link \"-\"]\n");
+        pgn.append("\n");
+
+        int actual = -1;
+        for (Informe informe : historial) {
+            if (informe.getNumeroMovimiento() != actual) {
+                actual = informe.getNumeroMovimiento();
+                pgn.append(actual);
+                pgn.append(". ");
+            }
+            pgn.append(informe.getNotacionAlgebraica());
+            pgn.append(" ");
+        }
+        pgn.append(informacion[2]);
+        return pgn.toString();
+    }
+
+    public void actualizarVictorias(int idPartida, boolean ganoBlanco) {
+        sql = "UPDATE jugador SET ganadas = ganadas + 1 WHERE id_jugador = (SELECT CASE WHEN ? THEN id_jugador_blanco ELSE id_jugador_negro END FROM partida WHERE id_partida = ?)";
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setBoolean(1, ganoBlanco);
+            pstmt.setInt(2, idPartida);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error al actualizar victorias: " + e.getMessage());
+        }
+    }
+
+    public void actualizarPerdidas(int idPartida, boolean ganoBlanco) {
+        sql = "UPDATE jugador SET perdidas = perdidas + 1 WHERE id_jugador = (SELECT CASE WHEN ? THEN id_jugador_blanco ELSE id_jugador_negro END FROM partida WHERE id_partida = ?)";
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setBoolean(1, ganoBlanco);
+            pstmt.setInt(2, idPartida);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error al actualizar perdidas: " + e.getMessage());
+        }
+    }
+
+    public void actualizarTablas(int idPartida, boolean tablas) {
+        sql = "UPDATE jugador SET tablas = tablas + 1 WHERE id_jugador = (SELECT CASE WHEN ? THEN id_jugador_blanco ELSE id_jugador_negro END FROM partida WHERE id_partida = ?)";
+
+        try (Connection conn = conexion.establecerConexion(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setBoolean(1, tablas);
+            pstmt.setInt(2, idPartida);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Error al actualizar tablas: " + e.getMessage());
+        }
+    }
+
+    public void mostrarEstadisticasJugador(int idJugador) {
+        sql = "SELECT id_jugador, nombre, elo, ganadas, perdidas, tablas FROM jugador WHERE id_jugador = ?";
+        Connection conn = conexion.establecerConexion();
+        if (conn == null) {
+            consola.mensaje("No se pudo conectar a la base de datos.");
+            return;
+        }
+
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, idJugador);
+            ResultSet rs = pstmt.executeQuery();while (rs.next()) {
+                consola.mostrarEstadisticasJugador(rs.getInt("id_jugador"), rs.getString("nombre"), rs.getInt("elo"), rs.getInt("ganadas"), rs.getInt("perdidas"), rs.getInt("tablas"));
+            }
+            } catch (SQLException e) {
+            System.out.println("Error al mostrar jugadores: " + e.getMessage());
+        }
     }
 }

@@ -25,7 +25,7 @@ public class Tablero {
     // PERSISTENCIA
     private StringBuilder respaldo;
     private Informe informe;
-    private String foto;
+    private String fen;
     private HashMap<String, Integer> registro;
     // =====================================================
     // CONSTRUCTOR
@@ -126,29 +126,39 @@ public class Tablero {
     public String getRespaldo() {
         respaldo = new StringBuilder();
         for (int fila = 0; fila < 8; fila++) {
+            int espacio = 0;
             for (int columna = 0; columna < 8; columna++) {
                 Pieza pieza = tablero[fila][columna];
                 if (pieza == null) {
-                    respaldo.append("nn");
-                    continue;
-                }
+                    espacio++;
+                } else {
+                    if (espacio > 0) {
+                        respaldo.append(espacio);
+                        espacio = 0;
+                    }
 
-                String letra = "";
-                if (pieza instanceof Rey) {
-                    letra = pieza.getEsBlanca() ? "K" : "k";
-                } else if (pieza instanceof Reina) {
-                    letra = pieza.getEsBlanca() ? "Q" : "q";
-                } else if (pieza instanceof Torre) {
-                    letra = pieza.getEsBlanca() ? "T" : "t";
-                } else if (pieza instanceof Alfil) {
-                    letra = pieza.getEsBlanca() ? "A" : "a";
-                } else if (pieza instanceof Caballo) {
-                    letra = pieza.getEsBlanca() ? "C" : "c";
-                } else if (pieza instanceof Peon) {
-                    letra = pieza.getEsBlanca() ? "P" : "p";
+                    String letra = "";
+                    if (pieza instanceof Rey) {
+                        letra = pieza.getEsBlanca() ? "K" : "k";
+                    } else if (pieza instanceof Reina) {
+                        letra = pieza.getEsBlanca() ? "Q" : "q";
+                    } else if (pieza instanceof Torre) {
+                        letra = pieza.getEsBlanca() ? "R" : "r";
+                    } else if (pieza instanceof Alfil) {
+                        letra = pieza.getEsBlanca() ? "B" : "b";
+                    } else if (pieza instanceof Caballo) {
+                        letra = pieza.getEsBlanca() ? "N" : "n";
+                    } else if (pieza instanceof Peon) {
+                        letra = pieza.getEsBlanca() ? "P" : "p";
+                    }
+                    respaldo.append(letra);
                 }
-                String movida = pieza.getSeMovio() ? "m" : "n";
-                respaldo.append(letra).append(movida);
+            }
+            if (espacio > 0) {
+                respaldo.append(espacio);
+            }
+            if (fila < 7) {
+                respaldo.append("/");
             }
         }
         return respaldo.toString();
@@ -159,14 +169,37 @@ public class Tablero {
         return informe;
     }
 
-    public String getFoto() {
-        String turno = esTurnoBlanco ? "Blanco" : "Negro";
+    public String getFEN() {
+        String turno = esTurnoBlanco ? "w" : "b";
         String capturaAlPaso = "-";
-        if (ultimoMovimiento != null) {
-            capturaAlPaso = ultimoMovimiento[0] + "," + ultimoMovimiento[1] + "," + ultimoMovimiento[2] + "," + ultimoMovimiento[3];
+        String enroque = "";
+
+        if (tablero[7][4] instanceof Rey && !tablero[7][4].getSeMovio()) {
+            if (tablero[7][7] instanceof Torre && !tablero[7][7].getSeMovio()) {
+                enroque += "K";
+            }
+            if (tablero[7][0] instanceof Torre && !tablero[7][0].getSeMovio()) {
+                enroque += "Q";
+            }
         }
-        foto = getRespaldo() + "|" + turno + "|" + capturaAlPaso;
-        return foto;
+
+        if (tablero[0][4] instanceof Rey && !tablero[0][4].getSeMovio()) {
+            if (tablero[0][7] instanceof Torre && !tablero[0][7].getSeMovio()) { 
+                enroque += "k";
+            }
+            if (tablero[0][0] instanceof Torre && !tablero[0][0].getSeMovio()) {
+                enroque += "q";
+            }
+        }
+
+        if (enroque.isEmpty()) {
+            enroque = "-";
+        }
+        if (ultimoMovimiento != null) {
+            capturaAlPaso = (char)(ultimoMovimiento[3] + 'a') + "" + ((8 - ultimoMovimiento[2]) + (esTurnoBlanco ? 1 : -1));
+        }
+        fen = getRespaldo() + " " + turno + " " + enroque + " " + capturaAlPaso + " " + getCincuentaMovimientos() + " " + getContadorMovimientos();
+        return fen;
     }
 
     public void setRegistro(HashMap<String, Integer> registro) {
@@ -209,50 +242,90 @@ public class Tablero {
         }
     }
 
-    public void restaurarPartida(String respaldo) {
-        Pieza pieza = null;
-        String[] resultado = respaldo.split("(?<=\\G..)");
-        int casilla = 0;
+    public void restaurarPartida(String fen) {
+        String[] partes = fen.split(" ");
 
-        for (int fila = 0; fila < 8; fila++) {
-            for (int columna = 0; columna < 8; columna++) {
-                String dato = resultado[casilla];
-                char tipo = dato.charAt(0);
-                char movida = dato.charAt(1);
-                boolean seMovio = movida == 'm';
-                boolean esBlanca = Character.isUpperCase(tipo);
-                if (tipo == 'n') {
-                    tablero[fila][columna] = null;
-                    casilla++;
-                    continue;
-                }
+        String piezas = partes[0];
+        String turno = partes[1];
+        String enroques = partes[2];
+        String enPassant = partes[3];
+        int cincuenta = Integer.parseInt(partes[4]);
+        int movimiento = Integer.parseInt(partes[5]);
 
-                switch (Character.toUpperCase(tipo)) {
-                    case 'K':
-                        pieza = new Rey(fila, columna, esBlanca);
-                        break;
-                    case 'Q':
-                        pieza = new Reina(fila, columna, esBlanca);
-                        break;
-                    case 'T':
-                        pieza = new Torre(fila, columna, esBlanca);
-                        break;
-                    case 'A':
-                        pieza = new Alfil(fila, columna, esBlanca);
-                        break;
-                    case 'C':
-                        pieza = new Caballo(fila, columna, esBlanca);
-                        break;
-                    case 'P':
-                        pieza = new Peon(fila, columna, esBlanca);
-                        break;
-                }
-                if (pieza != null) {
-                    pieza.setSeMovio(seMovio);
-                    tablero[fila][columna] = pieza;
-                }
-                casilla++;
+        int fila = 0;
+        int columna = 0;
+        for (char c : piezas.toCharArray()) {
+            if (c == '/') {
+                fila++;
+                columna = 0;
+                continue;
             }
+
+            if (Character.isDigit(c)) {
+                int espacios = Character.getNumericValue(c);
+                for (int x = 0; x < espacios; x++) {
+                    tablero[fila][columna] = null;
+                    columna++;
+                }
+                continue;
+            }
+            boolean esBlanca = Character.isUpperCase(c);
+            Pieza pieza = null;
+            switch (Character.toUpperCase(c)) {
+                case 'K':
+                    pieza = new Rey(fila, columna, esBlanca);
+                    break;
+                case 'Q':
+                    pieza = new Reina(fila, columna, esBlanca);
+                    break;
+                case 'R':
+                    pieza = new Torre(fila, columna, esBlanca);
+                    break;
+                case 'B':
+                    pieza = new Alfil(fila, columna, esBlanca);
+                    break;
+                case 'N':
+                    pieza = new Caballo(fila, columna, esBlanca);
+                    break;
+                case 'P':
+                    pieza = new Peon(fila, columna, esBlanca);
+                    break;
+            }
+            tablero[fila][columna] = pieza;
+            columna++;
+        }
+        esTurnoBlanco = turno.equals("w");
+        cincuentaMovimientos = cincuenta;
+        contadorMovimientos = movimiento;
+        if (tablero[7][4] instanceof Rey) {
+            tablero[7][4].setSeMovio(!(enroques.contains("K") || enroques.contains("Q")));
+        }
+        if (tablero[7][7] instanceof Torre) {
+            tablero[7][7].setSeMovio(!enroques.contains("K"));
+        }
+        if (tablero[7][0] instanceof Torre) {
+            tablero[7][0].setSeMovio(!enroques.contains("Q"));
+        }
+
+        if (tablero[0][4] instanceof Rey) {
+            tablero[0][4].setSeMovio(!(enroques.contains("k") || enroques.contains("q")));
+        }
+
+        if (tablero[0][7] instanceof Torre) {
+            tablero[0][7].setSeMovio(!enroques.contains("k"));
+        }
+
+        if (tablero[0][0] instanceof Torre) {
+            tablero[0][0].setSeMovio(!enroques.contains("q"));
+        }
+
+        if (enPassant.equals("-")) {
+            ultimoMovimiento = null;
+        } else {
+            int col = Character.toUpperCase(enPassant.charAt(0)) - 'A';
+            int filaEP = 8 - Character.getNumericValue(enPassant.charAt(1));
+            int filaOr = esTurnoBlanco ? filaEP + 1 : filaEP - 1;
+            ultimoMovimiento = new int[] { filaOr, col, filaEP, col };
         }
     }
 
@@ -265,9 +338,8 @@ public class Tablero {
         setCincuentaMovimientos(cincuentaMovimientos);
     }
 
-    public void registrarFoto() {
-        String foto = getFoto();
-        registro.put(foto, registro.getOrDefault(foto, 0) + 1);
+    public void registrarFEN() {
+        registro.put(getFEN(), registro.getOrDefault(getFEN(), 0) + 1);
     }
 
     public void restaurarRegistro(HashMap<String, Integer> registro) {
@@ -322,8 +394,8 @@ public class Tablero {
             esTurnoBlanco = !esTurnoBlanco;
             nuevoInforme.setEnroqueLargoCorto(true);
             cincuentaMovimientos++;
-            registrarFoto();
-            nuevoInforme.setFotoPosterior(getFoto());
+            registrarFEN();
+            nuevoInforme.setFEN(getFEN());
             informe = nuevoInforme;
             return true;
         }
@@ -342,8 +414,8 @@ public class Tablero {
             nuevoInforme.setCaptura(true);
             nuevoInforme.setCapturaAlPaso(true);
             cincuentaMovimientos = 0;
-            registrarFoto();
-            nuevoInforme.setFotoPosterior(getFoto());
+            registrarFEN();
+            nuevoInforme.setFEN(getFEN());
             informe = nuevoInforme;
             return true; // Captura al paso válida 
         }
@@ -408,8 +480,8 @@ public class Tablero {
         }
         informe = nuevoInforme;
         if (!hayPromocion) {
-            registrarFoto();
-            informe.setFotoPosterior(getFoto());
+            registrarFEN();
+            informe.setFEN(getFEN());
         }
         return true; 
     }
@@ -439,8 +511,8 @@ public class Tablero {
         nueva.setSeMovio(true);
         tablero[filaPromocion][colPromocion] = nueva;
         hayPromocion = false;
-        registrarFoto();
-        informe.setFotoPosterior(getFoto());
+        registrarFEN();
+        informe.setFEN(getFEN());
     }
 
     public void aumentarContadorMovimientos() {
@@ -816,8 +888,7 @@ public class Tablero {
     }
 
     public boolean tablasTripleRepeticion() {
-        String foto = getFoto();
-        return registro.getOrDefault(foto, 0) >= 3;
+        return registro.getOrDefault(getFEN(), 0) >= 3;
     }
     // =====================================================
     // DATOS DEL INFORME
