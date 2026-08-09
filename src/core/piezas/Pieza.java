@@ -1,4 +1,4 @@
-package core;
+package core.piezas;
 
 public abstract class Pieza {
     protected String nombre;

@@ -1,4 +1,4 @@
-package core;
+package core.piezas;
 
 public class Torre extends Pieza {
     public Torre(int fila, int columna, boolean esBlanca) {

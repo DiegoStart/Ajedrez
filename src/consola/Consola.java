@@ -1,6 +1,13 @@
 package consola;
 
 import core.*;
+import core.piezas.Alfil;
+import core.piezas.Caballo;
+import core.piezas.Peon;
+import core.piezas.Pieza;
+import core.piezas.Reina;
+import core.piezas.Rey;
+import core.piezas.Torre;
 
 public class Consola {
     private Tablero tablero;

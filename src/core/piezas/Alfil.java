@@ -1,4 +1,4 @@
-package core;
+package core.piezas;
 
 public class Alfil extends Pieza {
     public Alfil(int fila, int columna, boolean esBlanca) {

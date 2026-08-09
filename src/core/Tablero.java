@@ -2,6 +2,15 @@ package core;
 
 import java.util.HashMap;
 
+import core.piezas.Alfil;
+import core.piezas.Caballo;
+import core.piezas.Peon;
+import core.piezas.Pieza;
+import core.piezas.Reina;
+import core.piezas.Rey;
+import core.piezas.Torre;
+import modelo.Jugador;
+
 public class Tablero {
     // TABLERO
     private Pieza[][] tablero;
@@ -349,24 +358,28 @@ public class Tablero {
     // MOVIMIENTOS Y JUGADAS
     // =====================================================
     public boolean moverPieza(int filaOrigen, int colOrigen, int filaDestino, int colDestino) {
+    // 1. Validar que las coordenadas estén dentro del tablero
         if (!casillaValida(filaOrigen, colOrigen) || !casillaValida(filaDestino, colDestino)) {
-            return false; // Coordenadas no válidas
+            return false;
         }
         Pieza origen = tablero[filaOrigen][colOrigen];
         Pieza destino = tablero[filaDestino][colDestino];
+    // 2. Verificar existencia de la pieza de origen
         if (origen == null) {
-            return false; // No hay pieza en la casilla de origen
+            return false;
         }
         Informe nuevoInforme = new Informe(origen.getNombre(), origen.getEsBlanca(), filaOrigen, colOrigen, filaDestino, colDestino);
         nuevoInforme.setNumeroMovimiento(contadorMovimientos);
+        // 3. Validar correspondencia de turno
         if (origen.getEsBlanca() != esTurnoBlanco) {
             nuevoInforme.setMensaje("Esa pieza no es tuya. No la toques.");
             informe = nuevoInforme;
-            return false; // No es el turno del jugador de la pieza
+            return false;
         }
+        // 4. Procesar jugada especial: Enroque
         if (origen instanceof Rey && colOrigen == 4 && (colDestino == 2 || colDestino == 6)) {
             if (!enroqueLargoCorto(origen.getEsBlanca(), filaDestino, colDestino)) { 
-                return false; // Enroque no válido
+                return false;
             }
             Pieza torre = null;
             tablero[filaOrigen][colOrigen] = null;
@@ -386,7 +399,7 @@ public class Tablero {
                 tablero[filaDestino][5] = torre;
                 torre.setFila(filaDestino);
                 torre.setColumna(5);
-                nuevoInforme.setMensaje("¡Enroque corto realizado!");                                                                                  
+                nuevoInforme.setMensaje("¡Enroque corto realizado!");                                                                                                                                                                             
             }
             origen.setSeMovio(true);
             torre.setSeMovio(true);
@@ -399,10 +412,11 @@ public class Tablero {
             informe = nuevoInforme;
             return true;
         }
-        if (origen instanceof Peon && capturaAlPaso(filaOrigen,  colOrigen, filaDestino, colDestino)) {    
+        // 5. Procesar jugada especial: Captura al paso
+        if (origen instanceof Peon && capturaAlPaso(filaOrigen, colOrigen, filaDestino, colDestino)) {    
             int fila = origen.getEsBlanca() ? filaDestino + 1 : filaDestino - 1;
             tablero[filaOrigen][colOrigen] = null;
-            tablero[filaDestino][colDestino] = origen; // Muevo el peon del origen a la casilla destino
+            tablero[filaDestino][colDestino] = origen;
             origen.setFila(filaDestino);
             origen.setColumna(colDestino);
             tablero[fila][colDestino] = null;
@@ -417,50 +431,58 @@ public class Tablero {
             registrarFEN();
             nuevoInforme.setFEN(getFEN());
             informe = nuevoInforme;
-            return true; // Captura al paso válida 
+            return true;
         }
-        if (destino == null) { // Si esta vacio Movimiento normal
+        // 6. Validar movimiento básico o captura regular
+        if (destino == null) {
             if (!origen.movimiento(filaDestino, colDestino)) {
-                return false; // Movimiento no válido
+                return false;
             }
-        } else { // Si hay una pieza en la casilla destino Captura
+        } else {
             if (destino.getEsBlanca() == origen.getEsBlanca()) {
-                return false; // No puede capturar una pieza del mismo color
+                return false;
             }
             if (!origen.ataca(filaDestino, colDestino)) {
-                return false; // No puede capturar esa pieza
+                return false;
             }
         }
+        // 7. Verificar trayectoria sin obstrucciones
         if (origen instanceof Torre || origen instanceof Alfil || origen instanceof Reina) {
             if (!caminoLibre(origen, filaDestino, colDestino)) {  
-                return false; // El camino no está libre
+                return false;
             }
         }    
+        // 8. Simular movimiento para evitar auto-jaque
         if (!Simulacion(filaOrigen, colOrigen, filaDestino, colDestino)) {
-            return false; // Movimiento ilegal, deja en jaque al propio rey
+            return false;
         }
+        // 9. Actualizar estado de peón de dos casillas para posible captura al paso
         if (origen instanceof Peon && Math.abs(filaDestino - filaOrigen) == 2) {
             ultimoMovimiento = new int[]{filaOrigen, colOrigen, filaDestino, colDestino};
         } else {
-            ultimoMovimiento = null; // Otros movimientos no afectan al al paso
+            ultimoMovimiento = null;
         }
         determinarDesambiguacion(origen, nuevoInforme, filaDestino, colDestino);
+        // 10. Ejecutar desplazamiento físico de la pieza
         tablero[filaOrigen][colOrigen] = null;
         tablero[filaDestino][colDestino] = origen;
         origen.setFila(filaDestino);
         origen.setColumna(colDestino);
+        // 11. Registrar captura si aplica
         if (destino != null) {
             String colorOrigen = origen.getEsBlanca() ? " Blanco" : " Negro";
             String colorDestino = destino.getEsBlanca() ? " Blanco" : " Negro";
             nuevoInforme.setMensajeFormato("!El %s%s ha capturado al %s%s!", origen.getNombre(), colorOrigen, destino.getNombre(), colorDestino);
             nuevoInforme.setCaptura(true);
             nuevoInforme.setPiezaCapturada(destino.getNombre());
-        }
-        if (origen instanceof Peon || destino != null) { //Validacion para 50 movimientos
+        }   
+        // 12. Actualizar contador de la regla de los 50 movimientos
+        if (origen instanceof Peon || destino != null) {
             cincuentaMovimientos = 0;
         } else {
             cincuentaMovimientos++;
         }
+        // 13. Comprobar si hay promoción de peón
         if (origen instanceof Peon && (filaDestino == 0 || filaDestino == 7)) {
             hayPromocion = true;
             filaPromocion = filaDestino;
@@ -469,6 +491,7 @@ public class Tablero {
         } else {
             hayPromocion = false;
         }
+        // 14. Alternar turnos y gestionar relojes de tiempo
         origen.setSeMovio(true);
         esTurnoBlanco = !esTurnoBlanco;
         if (esTurnoBlanco) {
@@ -478,6 +501,7 @@ public class Tablero {
             relojNegras.reanudar();
             relojBlancas.pausar();
         }
+        // 15. Guardar informe y registrar notación FEN
         informe = nuevoInforme;
         if (!hayPromocion) {
             registrarFEN();
@@ -485,7 +509,7 @@ public class Tablero {
         }
         return true; 
     }
-    
+
     public void promocionPeon(int tipo) {
         Pieza origen = tablero[filaPromocion][colPromocion];
 

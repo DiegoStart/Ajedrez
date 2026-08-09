@@ -1,7 +1,8 @@
 package persistencia;
 
-import consola.*;
 import core.*;
+import modelo.Jugador;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +11,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import consola.Consola;
 
 public class AjedrezConsulta {
     Conexion conexion = new Conexion();
@@ -117,7 +120,7 @@ public class AjedrezConsulta {
             pstmt.setInt(5, idPartida);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar estado de partida: " + e.getMessage());
+            System.out.println("Error al actualizar instantanea de partida: " + e.getMessage());
         }
     }
 
@@ -176,9 +179,10 @@ public class AjedrezConsulta {
 
                 String nombreBlanco = rs.getString("blanco");
                 String nombreNegro = rs.getString("negro");
-                Jugador blanco = new Jugador(nombreBlanco, true);
-                Jugador negro = new Jugador(nombreNegro, false);
-
+                Jugador blanco = new Jugador();
+                Jugador negro = new Jugador();
+                blanco.setNombreJugador(nombreBlanco);
+                negro.setNombreJugador(nombreNegro);
                 Tablero tablero = new Tablero(blanco, negro);
                 tablero.restaurarPartida(respaldo);
                 int[] ultimoMovimiento = null;
@@ -550,7 +554,8 @@ public class AjedrezConsulta {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idJugador);
-            ResultSet rs = pstmt.executeQuery();while (rs.next()) {
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
                 consola.mostrarEstadisticasJugador(rs.getInt("id_jugador"), rs.getString("nombre"), rs.getInt("elo"), rs.getInt("ganadas"), rs.getInt("perdidas"), rs.getInt("tablas"));
             }
             } catch (SQLException e) {

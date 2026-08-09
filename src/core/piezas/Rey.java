@@ -1,4 +1,4 @@
-package core;
+package core.piezas;
 
 public class Rey extends Pieza {
     public Rey(int fila, int columna, boolean esBlanca) {

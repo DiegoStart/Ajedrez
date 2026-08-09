@@ -1,4 +1,4 @@
-package core;
+package core.piezas;
 
 public class Peon extends Pieza {
     public Peon(int fila, int columna, boolean esBlanca) {

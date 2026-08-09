@@ -1,4 +1,4 @@
-package consola;
+package app;
 
 public class AjedrezGamma {
     
