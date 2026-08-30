@@ -2,10 +2,14 @@ package core;
 
 public class Temporizador extends Thread {
     private volatile int segundos;
-    private volatile boolean pausado = true;
-    private volatile boolean activo = true;
+    private volatile boolean pausado;
+    private volatile boolean activo;
 
     public Temporizador(int segundos) {
+        this.segundos = segundos;
+    }
+
+    public void setSegundos(int segundos) {
         this.segundos = segundos;
     }
 

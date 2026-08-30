@@ -27,7 +27,7 @@ public class PartidaDao {
             return;
         }
 
-        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, partida.getEstado());
             pstmt.setString(2, partida.getResultado());
             pstmt.setString(3, partida.getCausaFinalizacion());
@@ -35,7 +35,11 @@ public class PartidaDao {
             pstmt.setString(5, partida.getTiempoControl());
             pstmt.setInt(6, partida.getDuracion());
             if (pstmt.executeUpdate() > 0) {
-                System.out.println("Partida registrada con éxito.");
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        partida.setIdPartida(rs.getInt(1));
+                    }
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error al registrar partida: " + e.getMessage());

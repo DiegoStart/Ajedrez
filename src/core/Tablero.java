@@ -1,6 +1,8 @@
 package core;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import core.piezas.Alfil;
 import core.piezas.Caballo;
@@ -9,60 +11,43 @@ import core.piezas.Pieza;
 import core.piezas.Reina;
 import core.piezas.Rey;
 import core.piezas.Torre;
-import modelo.Jugador;
+import modelo.Movimiento;
 
 public class Tablero {
     // TABLERO
     private Pieza[][] tablero;
-    // JUGADORES
-    private Jugador jugadorBlanco;
-    private Jugador jugadorNegro;
-    // ESTADO DE PARTIDA
+    // Estado del juego de ajedrez
     private boolean esTurnoBlanco;
     private int contadorMovimientos;
     private int cincuentaMovimientos;
     private int[] ultimoMovimiento;
-    // PROMOCIÓN
+    // Promoción
     private boolean hayPromocion;
     private int filaPromocion;
     private int colPromocion;
-    // TEMPORIZADOR
-    private Temporizador relojBlancas;
-    private Temporizador relojNegras;
-    private int tiempoBlancas;
-    private int tiempoNegras;
-    // PERSISTENCIA
-    private StringBuilder respaldo;
-    private Informe informe;
-    private String fen;
+    // Repetición
     private HashMap<String, Integer> registro;
-    // =====================================================
+
     // CONSTRUCTOR
-    // =====================================================
-    public Tablero(Jugador blanco, Jugador negro) {
+    public Tablero() {
         this.tablero = new Pieza[8][8];
-        this.jugadorBlanco = blanco;
-        this.jugadorNegro = negro;
         this.esTurnoBlanco = true; // blanco comienza
         this.ultimoMovimiento = null;
         this.contadorMovimientos = 1;
-        this.tiempoBlancas = 600; //Igual a 10 minutos
-        this.tiempoNegras = 600;
         this.registro = new HashMap<>();
     }
-    // =====================================================
+
     // GETTERS Y SETTERS
-    // =====================================================
-    public Pieza getPieza(int fila, int columna) {
-        return tablero[fila][columna];
+    public void setTablero(Pieza[][] tablero) {
+        this.tablero = tablero;
+    }
+    
+    public Pieza[][] getTablero() {
+        return tablero;
     }
 
-    public Jugador getJugadorBlanco() {
-        return jugadorBlanco;
-    }
-
-    public Jugador getJugadorNegro() {
-        return jugadorNegro;
+    public Pieza getPieza(int fila, int cola) {
+        return tablero[fila][cola];
     }
 
     public void setEsTurnoBlanco(boolean esTurnoBlanco) {
@@ -97,126 +82,43 @@ public class Tablero {
         return ultimoMovimiento;
     }
 
+    public void setHayPromocion(boolean hayPromocion) {
+        this.hayPromocion = hayPromocion;
+    }
+
     public boolean getHayPromocion() {
         return hayPromocion;
+    }
+
+    public void setFilaPromocion(int filaPromocion) {
+        this.filaPromocion = filaPromocion;
     }
 
     public int getFilaPromocion() {
         return filaPromocion;
     }
 
+    public void setColPromocion(int colPromocion) {
+        this.colPromocion = colPromocion;
+    }
+
     public int getColPromocion() {
         return colPromocion;
     }
 
-    public void setRelojes(Temporizador blancas, Temporizador negras) {
-        this.relojBlancas = blancas;
-        this.relojNegras = negras;
-    }
-
-    public void setTiempoBlancas(int tiempo) {
-        this.tiempoBlancas = tiempo;
-    }
-
-    public int getTiempoBlancas() {
-        return tiempoBlancas;
-    }
-
-    public void setTiempoNegras(int tiempo) {
-        this.tiempoNegras = tiempo;
-    }
-
-    public int getTiempoNegras() {
-        return tiempoNegras;
-    }
-    // =====================================================
-    // PERSISTENCIA
-    // =====================================================
-    public String getRespaldo() {
-        respaldo = new StringBuilder();
-        for (int fila = 0; fila < 8; fila++) {
-            int espacio = 0;
-            for (int columna = 0; columna < 8; columna++) {
-                Pieza pieza = tablero[fila][columna];
-                if (pieza == null) {
-                    espacio++;
-                } else {
-                    if (espacio > 0) {
-                        respaldo.append(espacio);
-                        espacio = 0;
-                    }
-
-                    String letra = "";
-                    if (pieza instanceof Rey) {
-                        letra = pieza.getEsBlanca() ? "K" : "k";
-                    } else if (pieza instanceof Reina) {
-                        letra = pieza.getEsBlanca() ? "Q" : "q";
-                    } else if (pieza instanceof Torre) {
-                        letra = pieza.getEsBlanca() ? "R" : "r";
-                    } else if (pieza instanceof Alfil) {
-                        letra = pieza.getEsBlanca() ? "B" : "b";
-                    } else if (pieza instanceof Caballo) {
-                        letra = pieza.getEsBlanca() ? "N" : "n";
-                    } else if (pieza instanceof Peon) {
-                        letra = pieza.getEsBlanca() ? "P" : "p";
-                    }
-                    respaldo.append(letra);
-                }
-            }
-            if (espacio > 0) {
-                respaldo.append(espacio);
-            }
-            if (fila < 7) {
-                respaldo.append("/");
-            }
-        }
-        return respaldo.toString();
-    }
-
-    public Informe getInforme() {
-        analisisDeEstado(informe);
-        return informe;
-    }
-
-    public String getFEN() {
-        String turno = esTurnoBlanco ? "w" : "b";
-        String capturaAlPaso = "-";
-        String enroque = "";
-
-        if (tablero[7][4] instanceof Rey && !tablero[7][4].getSeMovio()) {
-            if (tablero[7][7] instanceof Torre && !tablero[7][7].getSeMovio()) {
-                enroque += "K";
-            }
-            if (tablero[7][0] instanceof Torre && !tablero[7][0].getSeMovio()) {
-                enroque += "Q";
-            }
-        }
-
-        if (tablero[0][4] instanceof Rey && !tablero[0][4].getSeMovio()) {
-            if (tablero[0][7] instanceof Torre && !tablero[0][7].getSeMovio()) { 
-                enroque += "k";
-            }
-            if (tablero[0][0] instanceof Torre && !tablero[0][0].getSeMovio()) {
-                enroque += "q";
-            }
-        }
-
-        if (enroque.isEmpty()) {
-            enroque = "-";
-        }
-        if (ultimoMovimiento != null) {
-            capturaAlPaso = (char)(ultimoMovimiento[3] + 'a') + "" + ((8 - ultimoMovimiento[2]) + (esTurnoBlanco ? 1 : -1));
-        }
-        fen = getRespaldo() + " " + turno + " " + enroque + " " + capturaAlPaso + " " + getCincuentaMovimientos() + " " + getContadorMovimientos();
-        return fen;
-    }
-
     public void setRegistro(HashMap<String, Integer> registro) {
-        this.registro = new HashMap<>(registro);
+        this.registro = registro;
     }
-    // =====================================================
-    // INICIALIZACIÓN Y RESTAURACIÓN
-    // =====================================================
+
+    public HashMap<String, Integer> getRegistro() {
+        return registro;
+    }
+
+    public void actualizarRegistro(String fen) {
+        registro.put(fen, registro.getOrDefault(fen, 0) + 1);
+    }
+
+    // INICIALIZACIÓN 
     public void iniciarPartida() {
         tablero[7][0] = new Torre(7, 0, true);
         tablero[7][1] = new Caballo(7, 1, true);
@@ -250,301 +152,171 @@ public class Tablero {
             }
         }
     }
-
-    public void restaurarPartida(String fen) {
-        String[] partes = fen.split(" ");
-
-        String piezas = partes[0];
-        String turno = partes[1];
-        String enroques = partes[2];
-        String enPassant = partes[3];
-        int cincuenta = Integer.parseInt(partes[4]);
-        int movimiento = Integer.parseInt(partes[5]);
-
-        int fila = 0;
-        int columna = 0;
-        for (char c : piezas.toCharArray()) {
-            if (c == '/') {
-                fila++;
-                columna = 0;
-                continue;
-            }
-
-            if (Character.isDigit(c)) {
-                int espacios = Character.getNumericValue(c);
-                for (int x = 0; x < espacios; x++) {
-                    tablero[fila][columna] = null;
-                    columna++;
-                }
-                continue;
-            }
-            boolean esBlanca = Character.isUpperCase(c);
-            Pieza pieza = null;
-            switch (Character.toUpperCase(c)) {
-                case 'K':
-                    pieza = new Rey(fila, columna, esBlanca);
-                    break;
-                case 'Q':
-                    pieza = new Reina(fila, columna, esBlanca);
-                    break;
-                case 'R':
-                    pieza = new Torre(fila, columna, esBlanca);
-                    break;
-                case 'B':
-                    pieza = new Alfil(fila, columna, esBlanca);
-                    break;
-                case 'N':
-                    pieza = new Caballo(fila, columna, esBlanca);
-                    break;
-                case 'P':
-                    pieza = new Peon(fila, columna, esBlanca);
-                    break;
-            }
-            tablero[fila][columna] = pieza;
-            columna++;
-        }
-        esTurnoBlanco = turno.equals("w");
-        cincuentaMovimientos = cincuenta;
-        contadorMovimientos = movimiento;
-        if (tablero[7][4] instanceof Rey) {
-            tablero[7][4].setSeMovio(!(enroques.contains("K") || enroques.contains("Q")));
-        }
-        if (tablero[7][7] instanceof Torre) {
-            tablero[7][7].setSeMovio(!enroques.contains("K"));
-        }
-        if (tablero[7][0] instanceof Torre) {
-            tablero[7][0].setSeMovio(!enroques.contains("Q"));
-        }
-
-        if (tablero[0][4] instanceof Rey) {
-            tablero[0][4].setSeMovio(!(enroques.contains("k") || enroques.contains("q")));
-        }
-
-        if (tablero[0][7] instanceof Torre) {
-            tablero[0][7].setSeMovio(!enroques.contains("k"));
-        }
-
-        if (tablero[0][0] instanceof Torre) {
-            tablero[0][0].setSeMovio(!enroques.contains("q"));
-        }
-
-        if (enPassant.equals("-")) {
-            ultimoMovimiento = null;
-        } else {
-            int col = Character.toUpperCase(enPassant.charAt(0)) - 'A';
-            int filaEP = 8 - Character.getNumericValue(enPassant.charAt(1));
-            int filaOr = esTurnoBlanco ? filaEP + 1 : filaEP - 1;
-            ultimoMovimiento = new int[] { filaOr, col, filaEP, col };
-        }
-    }
-
-    public void restaurarEstado(boolean esTurnoBlanco, int[] ultimoMovimiento, int tiempoBlancas, int tiempoNegras, int contadorMovimientos, int cincuentaMovimientos) {
-        setEsTurnoBlanco(esTurnoBlanco);
-        setUltimoMovimiento(ultimoMovimiento);
-        setTiempoBlancas(tiempoBlancas);
-        setTiempoNegras(tiempoNegras);
-        setContadorMovimientos(contadorMovimientos);
-        setCincuentaMovimientos(cincuentaMovimientos);
-    }
-
-    public void registrarFEN() {
-        registro.put(getFEN(), registro.getOrDefault(getFEN(), 0) + 1);
-    }
-
-    public void restaurarRegistro(HashMap<String, Integer> registro) {
-        this.registro = registro;
-    }
-    // =====================================================
+    
     // MOVIMIENTOS Y JUGADAS
-    // =====================================================
-    public boolean moverPieza(int filaOrigen, int colOrigen, int filaDestino, int colDestino) {
-    // 1. Validar que las coordenadas estén dentro del tablero
+    public Movimiento moverPieza(int filaOrigen, int colOrigen, int filaDestino, int colDestino) {
+    // 1. Validar coordenadas
         if (!casillaValida(filaOrigen, colOrigen) || !casillaValida(filaDestino, colDestino)) {
-            return false;
+            return null;
         }
         Pieza origen = tablero[filaOrigen][colOrigen];
         Pieza destino = tablero[filaDestino][colDestino];
-    // 2. Verificar existencia de la pieza de origen
+    // 2. Verificar que exista una pieza
         if (origen == null) {
-            return false;
+            return null;
         }
-        Informe nuevoInforme = new Informe(origen.getNombre(), origen.getEsBlanca(), filaOrigen, colOrigen, filaDestino, colDestino);
-        nuevoInforme.setNumeroMovimiento(contadorMovimientos);
-        // 3. Validar correspondencia de turno
+    // 3. Verificar turno
         if (origen.getEsBlanca() != esTurnoBlanco) {
-            nuevoInforme.setMensaje("Esa pieza no es tuya. No la toques.");
-            informe = nuevoInforme;
-            return false;
+            return null;
         }
-        // 4. Procesar jugada especial: Enroque
+    // 4. Crear movimiento
+        Movimiento movimiento = new Movimiento();
+        movimiento.setNumeroMovimiento(contadorMovimientos);
+        movimiento.setColor(origen.getEsBlanca());
+        movimiento.setPieza(origen.getNombre());
+        movimiento.setOrigen(new int[]{filaOrigen, colOrigen});
+        movimiento.setDestino(new int[]{filaDestino, colDestino});
+    // 5. Enroque
         if (origen instanceof Rey && colOrigen == 4 && (colDestino == 2 || colDestino == 6)) {
-            if (!enroqueLargoCorto(origen.getEsBlanca(), filaDestino, colDestino)) { 
-                return false;
+            if (!enroqueLargoCorto(origen.getEsBlanca(), filaDestino, colDestino)) {
+                return null;
             }
-            Pieza torre = null;
+            Pieza torre;
             tablero[filaOrigen][colOrigen] = null;
             tablero[filaDestino][colDestino] = origen;
             origen.setFila(filaDestino);
             origen.setColumna(colDestino);
+
             if (colDestino == 2) {
                 torre = tablero[filaOrigen][0];
                 tablero[filaOrigen][0] = null;
                 tablero[filaDestino][3] = torre;
                 torre.setFila(filaDestino);
                 torre.setColumna(3);
-                nuevoInforme.setMensaje("¡Enroque largo realizado!");
-            } else if (colDestino == 6) {
+            } else {
                 torre = tablero[filaOrigen][7];
                 tablero[filaOrigen][7] = null;
                 tablero[filaDestino][5] = torre;
                 torre.setFila(filaDestino);
                 torre.setColumna(5);
-                nuevoInforme.setMensaje("¡Enroque corto realizado!");                                                                                                                                                                             
             }
             origen.setSeMovio(true);
             torre.setSeMovio(true);
             ultimoMovimiento = null;
             esTurnoBlanco = !esTurnoBlanco;
-            nuevoInforme.setEnroqueLargoCorto(true);
+            movimiento.setTipoMovimiento(colDestino == 2 ? "ENROQUE_LARGO" : "ENROQUE_CORTO");
             cincuentaMovimientos++;
-            registrarFEN();
-            nuevoInforme.setFEN(getFEN());
-            informe = nuevoInforme;
-            return true;
+            return movimiento;
         }
-        // 5. Procesar jugada especial: Captura al paso
-        if (origen instanceof Peon && capturaAlPaso(filaOrigen, colOrigen, filaDestino, colDestino)) {    
-            int fila = origen.getEsBlanca() ? filaDestino + 1 : filaDestino - 1;
+    // 6. Captura al paso
+        if (origen instanceof Peon && capturaAlPaso(filaOrigen, colOrigen, filaDestino, colDestino)) {
+            int filaCapturada = origen.getEsBlanca() ? filaDestino + 1 : filaDestino - 1;
             tablero[filaOrigen][colOrigen] = null;
             tablero[filaDestino][colDestino] = origen;
             origen.setFila(filaDestino);
             origen.setColumna(colDestino);
-            tablero[fila][colDestino] = null;
+            tablero[filaCapturada][colDestino] = null;
             origen.setSeMovio(true);
-            ultimoMovimiento = null; 
+            ultimoMovimiento = null;
             esTurnoBlanco = !esTurnoBlanco;
-            nuevoInforme.setMensaje("¡Captura al paso realizada!");
-            nuevoInforme.setPiezaCapturada("Peon");
-            nuevoInforme.setCaptura(true);
-            nuevoInforme.setCapturaAlPaso(true);
+            movimiento.setTipoMovimiento("CAPTURA_AL_PASO");
+            movimiento.setPiezaCapturada("Peon");
             cincuentaMovimientos = 0;
-            registrarFEN();
-            nuevoInforme.setFEN(getFEN());
-            informe = nuevoInforme;
-            return true;
+            return movimiento;
         }
-        // 6. Validar movimiento básico o captura regular
+    // 7. Validar movimiento normal o captura
         if (destino == null) {
             if (!origen.movimiento(filaDestino, colDestino)) {
-                return false;
+                return null;
             }
         } else {
             if (destino.getEsBlanca() == origen.getEsBlanca()) {
-                return false;
+                return null;
             }
             if (!origen.ataca(filaDestino, colDestino)) {
-                return false;
+                return null;
             }
         }
-        // 7. Verificar trayectoria sin obstrucciones
+    // 8. Verificar trayectoria
         if (origen instanceof Torre || origen instanceof Alfil || origen instanceof Reina) {
-            if (!caminoLibre(origen, filaDestino, colDestino)) {  
-                return false;
+            if (!caminoLibre(origen, filaDestino, colDestino)) {
+                return null;
             }
-        }    
-        // 8. Simular movimiento para evitar auto-jaque
-        if (!Simulacion(filaOrigen, colOrigen, filaDestino, colDestino)) {
-            return false;
         }
-        // 9. Actualizar estado de peón de dos casillas para posible captura al paso
+    // 9. Verificar que no deje al rey en jaque
+        if (!Simulacion(filaOrigen, colOrigen, filaDestino, colDestino)) {
+            return null;
+        }
+    // 10. Guardar información de captura
+        if (destino != null) {
+            movimiento.setPiezaCapturada(destino.getNombre());
+            movimiento.setTipoMovimiento("CAPTURA");
+            cincuentaMovimientos = 0;
+        } else {
+            movimiento.setTipoMovimiento("NORMAL");
+            if (origen instanceof Peon) {
+                cincuentaMovimientos = 0;
+            } else {
+                cincuentaMovimientos++;
+            }
+        }
+    // 11. Registrar movimiento de peón de dos casillas
         if (origen instanceof Peon && Math.abs(filaDestino - filaOrigen) == 2) {
             ultimoMovimiento = new int[]{filaOrigen, colOrigen, filaDestino, colDestino};
         } else {
             ultimoMovimiento = null;
         }
-        determinarDesambiguacion(origen, nuevoInforme, filaDestino, colDestino);
-        // 10. Ejecutar desplazamiento físico de la pieza
+    // 12. Ejecutar movimiento
         tablero[filaOrigen][colOrigen] = null;
         tablero[filaDestino][colDestino] = origen;
         origen.setFila(filaDestino);
         origen.setColumna(colDestino);
-        // 11. Registrar captura si aplica
-        if (destino != null) {
-            String colorOrigen = origen.getEsBlanca() ? " Blanco" : " Negro";
-            String colorDestino = destino.getEsBlanca() ? " Blanco" : " Negro";
-            nuevoInforme.setMensajeFormato("!El %s%s ha capturado al %s%s!", origen.getNombre(), colorOrigen, destino.getNombre(), colorDestino);
-            nuevoInforme.setCaptura(true);
-            nuevoInforme.setPiezaCapturada(destino.getNombre());
-        }   
-        // 12. Actualizar contador de la regla de los 50 movimientos
-        if (origen instanceof Peon || destino != null) {
-            cincuentaMovimientos = 0;
-        } else {
-            cincuentaMovimientos++;
-        }
-        // 13. Comprobar si hay promoción de peón
+        origen.setSeMovio(true);
+    // 13. Comprobar promoción
         if (origen instanceof Peon && (filaDestino == 0 || filaDestino == 7)) {
             hayPromocion = true;
             filaPromocion = filaDestino;
             colPromocion = colDestino;
-            nuevoInforme.setPromocionPeon(true);
+            movimiento.setTipoMovimiento("PROMOCION");
         } else {
             hayPromocion = false;
         }
-        // 14. Alternar turnos y gestionar relojes de tiempo
-        origen.setSeMovio(true);
+    // 14. Cambiar turno
         esTurnoBlanco = !esTurnoBlanco;
-        if (esTurnoBlanco) {
-            relojBlancas.reanudar();
-            relojNegras.pausar();
-        } else {
-            relojNegras.reanudar();
-            relojBlancas.pausar();
-        }
-        // 15. Guardar informe y registrar notación FEN
-        informe = nuevoInforme;
+    // 15. Registrar posición
         if (!hayPromocion) {
-            registrarFEN();
-            informe.setFEN(getFEN());
         }
-        return true; 
+        return movimiento;
     }
 
-    public void promocionPeon(int tipo) {
+    public Pieza promocionPeon(int tipo) {
         Pieza origen = tablero[filaPromocion][colPromocion];
-
         Pieza nueva;
-        switch (tipo) {   
-            case 1:   
+        switch (tipo) {
+            case 1:
                 nueva = new Torre(filaPromocion, colPromocion, origen.getEsBlanca());
-                informe.setPiezaPromocion('T');
                 break;
-            case 2: 
+            case 2:
                 nueva = new Alfil(filaPromocion, colPromocion, origen.getEsBlanca());
-                informe.setPiezaPromocion('A');
                 break;
-            case 3: 
+            case 3:
                 nueva = new Caballo(filaPromocion, colPromocion, origen.getEsBlanca());
-                informe.setPiezaPromocion('C');
                 break;
-            default: 
+            default:
                 nueva = new Reina(filaPromocion, colPromocion, origen.getEsBlanca());
-                informe.setPiezaPromocion('D');
                 break;
-        } 
+        }
         nueva.setSeMovio(true);
         tablero[filaPromocion][colPromocion] = nueva;
         hayPromocion = false;
-        registrarFEN();
-        informe.setFEN(getFEN());
+        return nueva;
     }
 
     public void aumentarContadorMovimientos() {
         this.contadorMovimientos++;
     }
-    // =====================================================
+
     // REGLAS ESPECIALES
-    // =====================================================
     private boolean enroqueLargoCorto(boolean esBlanca, int filaDestino, int colDestino) {
         if (estaEnJaque(esBlanca)) {
             return false; // No se puede enrocar estando en jaque
@@ -630,9 +402,8 @@ public class Tablero {
         }
         return legal; // Retorno si el movimiento es legal o no
     }
-    // =====================================================
+
     // VALIDACIONES BÁSICAS
-    // =====================================================
     private boolean casillaValida(int filaOrigen, int colOrigen) {
         return filaOrigen >= 0 && filaOrigen < 8 && colOrigen >= 0 && colOrigen < 8;
     }
@@ -651,9 +422,8 @@ public class Tablero {
         }
         return true; //Casilla Libre
     }
-    // =====================================================
+
     // ANÁLISIS DE POSICIÓN
-    // =====================================================
     private boolean casillaControlada(int filaDestino, int colDestino, boolean esBlanca) { //casillaControlada = detector de amenazas enemigas
         for (int fila = 0; fila < 8; fila++) {
             for (int columna = 0; columna < 8; columna++) {
@@ -817,9 +587,8 @@ public class Tablero {
         }
         return mensaje.toString();
     }
-    // =====================================================
+    
     // TABLAS Y FINALIZACIÓN
-    // =====================================================
     public boolean tablasAhogado(boolean esTurnoBlanco) {
         if (estaEnJaque(esTurnoBlanco)) {     
             return false;
@@ -882,15 +651,11 @@ public class Tablero {
                     if (pieza instanceof Caballo) {
                         caballo++;
                     }
+                    if (pieza instanceof Rey) {
+                        rey++;
+                    }
                 }
             }
-        }
-
-        if (relojBlancas.tiempoAgotado() || relojNegras.tiempoAgotado()) {
-            if (caballo == 2) {
-                return true;
-            }
-            return false;
         }
 
         if (piezas == 3 || piezas == 2) {
@@ -911,41 +676,19 @@ public class Tablero {
         return cincuentaMovimientos >= 100;
     }
 
-    public boolean tablasTripleRepeticion() {
-        return registro.getOrDefault(getFEN(), 0) >= 3;
-    }
-    // =====================================================
-    // DATOS DEL INFORME
-    // =====================================================
-    private void analisisDeEstado(Informe nuevoInforme) {
-        if (tablasAhogado(getEsTurnoBlanco())) {        
-            nuevoInforme.setCausaTablas("Ahogado");
-        }
-        if (tablasMaterialInsuficiente()) {
-            nuevoInforme.setCausaTablas("Material Insuficiente");
-        }
-        if (tablasCincuentaMovimientos()) {
-            nuevoInforme.setCausaTablas("50 Movimientos");
-        }
-        if (tablasTripleRepeticion()) {
-            nuevoInforme.setCausaTablas("Triple Repetición");
-        }
-        if (estaEnJaque(getEsTurnoBlanco())) {
-            nuevoInforme.setJaque(true);
-            if (estaJaqueMate(getEsTurnoBlanco())) {
-                nuevoInforme.setJaqueMate(true);
-            }
-        }
+    public boolean tablasTripleRepeticion(String fen) {
+        return registro.getOrDefault(fen, 0) >= 3;
     }
 
-    private void determinarDesambiguacion(Pieza pieza, Informe nuevoInforme, int filaDestino, int colDestino) {
+    // DATOS DEL MOVIMIENTO
+    public List<Pieza> desambiguacion(Pieza pieza, int filaDestino, int colDestino) {
+        List<Pieza> candidatas = new ArrayList<>();
         for (int filaOrigen = 0; filaOrigen < 8; filaOrigen++) {
             for (int colOrigen = 0; colOrigen < 8; colOrigen++) {
                 if (pieza.getFila() == filaOrigen && pieza.getColumna() == colOrigen) {
                     continue;
                 }
                 Pieza candidata = tablero[filaOrigen][colOrigen];
-                int[] coordenadas = {filaOrigen, colOrigen};
                 if (candidata == null || candidata.getClass() != pieza.getClass() || candidata.getEsBlanca() != pieza.getEsBlanca()) {
                     continue;
                 }
@@ -972,8 +715,9 @@ public class Tablero {
                 if (!Simulacion(filaOrigen, colOrigen, filaDestino, colDestino)) {
                     continue; // Movimiento ilegal, deja en jaque al propio rey
                 }
-                nuevoInforme.setCadidatas(coordenadas); // Guarda casillas de pieza candidata
+                candidatas.add(candidata);
             }
         }
+        return candidatas;
     }
 }

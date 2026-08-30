@@ -38,9 +38,6 @@ public class InstantaneaDao {
             pstmt.setString(6, Arrays.toString(instantanea.getUltimoMovimiento()));
             pstmt.setInt(7, instantanea.getContadorMovimientos());
             pstmt.setInt(8, instantanea.getCincuentaMovimientos());
-            if (pstmt.executeUpdate() > 0) {
-                System.out.println("Instantanea registrada con éxito.");
-            }
         } catch (SQLException e) {
             System.out.println("Error al registrar instantanea: " + e.getMessage());
         }
@@ -207,7 +204,7 @@ public class InstantaneaDao {
     }
 
     private int[] convertirMovimiento(String movimiento) {
-        if (movimiento == null || movimiento.isEmpty()) {
+        if (movimiento.isEmpty() || movimiento.equals("null")) {
             return null;
         }
 
