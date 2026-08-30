@@ -28,7 +28,7 @@ public class JugadorDao {
             return;
         }
 
-        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             if (jugador.getUsuario() != null) {
                 pstmt.setInt(1, jugador.getUsuario().getIdUsuario());
             } else {
@@ -43,7 +43,11 @@ public class JugadorDao {
             pstmt.setInt(8, jugador.getRendiciones());
             pstmt.setInt(9, jugador.getAbandonos());
             if (pstmt.executeUpdate() > 0) {
-                System.out.println("Jugador registrado con éxito.");
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        jugador.setIdJugador(rs.getInt(1));
+                    }
+                }
             }
         } catch (SQLException e) {
             System.out.println("Error al registrar jugador: " + e.getMessage());

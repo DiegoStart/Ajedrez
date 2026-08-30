@@ -36,9 +36,6 @@ public class ParticipacionDao {
             pstmt.setBoolean(3, participacion.getColor());
             pstmt.setString(4, participacion.getResultadoIndividual());
             pstmt.setInt(5, participacion.getTiempoRestante());
-            if (pstmt.executeUpdate() > 0) {
-                System.out.println("Participacion registrado con éxito.");
-            }
         } catch (SQLException e) {
             System.out.println("Error al registrar participacion: " + e.getMessage());
         }

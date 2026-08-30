@@ -44,9 +44,6 @@ public class MovimientoDao {
             pstmt.setString(12, movimiento.getNotacionAlgebraica());
             pstmt.setString(13, movimiento.getPiezaPromocion());
             pstmt.setString(14, movimiento.getFen());
-            if (pstmt.executeUpdate() > 0) {
-                System.out.println("Movimiento registrado con éxito.");
-            }
         } catch (SQLException e) {
             System.out.println("Error al registrar movimiento: " + e.getMessage());
         }

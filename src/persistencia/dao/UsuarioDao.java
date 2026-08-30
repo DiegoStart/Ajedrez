@@ -41,9 +41,6 @@ public class UsuarioDao {
             pstmt.setString(6, usuario.getFotoPerfil());
             pstmt.setTimestamp(7, Timestamp.valueOf(usuario.getUltimoAcceso()));
             pstmt.setString(8, usuario.getEstado());
-            if (pstmt.executeUpdate() > 0) {
-                System.out.println("Usuario registrado con éxito.");
-            }
         } catch (SQLException e) {
             System.out.println("Error al registrar usuario: " + e.getMessage());
         }
