@@ -38,6 +38,7 @@ public class InstantaneaDao {
             pstmt.setString(6, Arrays.toString(instantanea.getUltimoMovimiento()));
             pstmt.setInt(7, instantanea.getContadorMovimientos());
             pstmt.setInt(8, instantanea.getCincuentaMovimientos());
+            pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Error al registrar instantanea: " + e.getMessage());
         }
