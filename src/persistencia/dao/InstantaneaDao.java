@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import consola.Consola;
 import modelo.Instantanea;
 import persistencia.Conexion;
 
@@ -29,7 +30,7 @@ public class InstantaneaDao {
             return;
         }
 
-        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setInt(1, instantanea.getPartida().getIdPartida());
             pstmt.setString(2, instantanea.getEstadoActual());
             pstmt.setBoolean(3, instantanea.getTurnoActual());
@@ -38,9 +39,15 @@ public class InstantaneaDao {
             pstmt.setString(6, Arrays.toString(instantanea.getUltimoMovimiento()));
             pstmt.setInt(7, instantanea.getContadorMovimientos());
             pstmt.setInt(8, instantanea.getCincuentaMovimientos());
-            pstmt.executeUpdate();
+            if (pstmt.executeUpdate() > 0) {
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        instantanea.setIdInstantanea(rs.getInt(1));
+                    }
+                }
+            }
         } catch (SQLException e) {
-            System.out.println("Error al registrar instantanea: " + e.getMessage());
+            Consola.error("Error al registrar instantanea: " + e.getMessage());
         }
     }
 
@@ -55,7 +62,7 @@ public class InstantaneaDao {
             pstmt.setInt(1, idInstantanea); 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al eliminar instantanea: " + e.getMessage());
+            Consola.error("Error al eliminar instantanea: " + e.getMessage());
         }
     }
 
@@ -82,7 +89,7 @@ public class InstantaneaDao {
                 instantaneas.add(instantanea);
             }
         } catch (SQLException e) {
-            System.out.println("Error al mostrar instantaneas guardadas: " + e.getMessage());
+            Consola.error("Error al mostrar instantaneas guardadas: " + e.getMessage());
         }
         return instantaneas;
     }
@@ -105,7 +112,7 @@ public class InstantaneaDao {
             pstmt.setInt(8, instantanea.getIdInstantanea());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar instantanea: " + e.getMessage());
+            Consola.error("Error al actualizar instantanea: " + e.getMessage());
         }
     }
 
@@ -133,7 +140,7 @@ public class InstantaneaDao {
                 return instantanea;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar instantanea: " + e.getMessage());
+            Consola.error("Error al buscar instantanea: " + e.getMessage());
         }
         return null;
     }
@@ -162,7 +169,7 @@ public class InstantaneaDao {
                 return instantanea;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar instantanea: " + e.getMessage());
+            Consola.error("Error al buscar instantanea: " + e.getMessage());
         }
         return null;
     }
@@ -185,7 +192,7 @@ public class InstantaneaDao {
             pstmt.setInt(8, instantanea.getPartida().getIdPartida());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar instantanea: " + e.getMessage());
+            Consola.error("Error al actualizar instantanea: " + e.getMessage());
         }
     }
 
@@ -200,7 +207,7 @@ public class InstantaneaDao {
             pstmt.setInt(1, idPartida); 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al eliminar instantanea: " + e.getMessage());
+            Consola.error("Error al eliminar instantanea: " + e.getMessage());
         }
     }
 

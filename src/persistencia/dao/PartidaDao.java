@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import consola.Consola;
 import modelo.Partida;
 import persistencia.Conexion;
 
@@ -42,7 +43,7 @@ public class PartidaDao {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Error al registrar partida: " + e.getMessage());
+            Consola.error("Error al registrar partida: " + e.getMessage());
         }
     }
 
@@ -210,18 +211,17 @@ public class PartidaDao {
     }
 
     public void finalizarPartida(Partida partida) {
-        sql = "UPDATE ajedrez.partida SET estado = ?, resultado = ?, causa_finalizacion = ?, duracion = ?, fecha_fin = CURRENT_TIMESTAMP WHERE id_partida = ?";
+        sql = "UPDATE ajedrez.partida SET estado = 'FINALIZADA', resultado = ?, causa_finalizacion = ?, duracion = ?, fecha_fin = CURRENT_TIMESTAMP WHERE id_partida = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             return;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, partida.getEstado());
-            pstmt.setString(2, partida.getResultado());
-            pstmt.setString(3, partida.getCausaFinalizacion());
-            pstmt.setInt(4, partida.getDuracion());
-            pstmt.setInt(5, partida.getIdPartida());
+            pstmt.setString(1, partida.getResultado());
+            pstmt.setString(2, partida.getCausaFinalizacion());
+            pstmt.setInt(3, partida.getDuracion());
+            pstmt.setInt(4, partida.getIdPartida());
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Error al actualizar partida: " + e.getMessage());
@@ -242,9 +242,5 @@ public class PartidaDao {
         } catch (SQLException e) {
             System.out.println("Error al actualizar partida: " + e.getMessage());
         }
-    }
-
-    public List<Partida> buscarPartidasEnCurso() {
-        return buscarPorEstado("EN_CURSO");
     }
 }

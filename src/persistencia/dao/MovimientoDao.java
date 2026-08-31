@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import consola.Consola;
 import modelo.Movimiento;
 import persistencia.Conexion;
 
@@ -46,7 +47,7 @@ public class MovimientoDao {
             pstmt.setString(14, movimiento.getFen());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al registrar movimiento: " + e.getMessage());
+            Consola.error("Error al registrar movimiento: " + e.getMessage());
         }
     }
 
@@ -61,7 +62,7 @@ public class MovimientoDao {
             pstmt.setInt(1, idMovimiento); 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al eliminar movimiento: " + e.getMessage());
+            Consola.error("Error al eliminar movimiento: " + e.getMessage());
         }
     }
 
@@ -95,7 +96,7 @@ public class MovimientoDao {
                 movimientos.add(movimiento);
             }
         } catch (SQLException e) {
-            System.out.println("Error al mostrar movimientos guardados: " + e.getMessage());
+            Consola.error("Error al mostrar movimientos guardados: " + e.getMessage());
         }
         return movimientos;
     }
@@ -130,7 +131,7 @@ public class MovimientoDao {
                 return movimiento;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar movimiento: " + e.getMessage());
+            Consola.error("Error al buscar movimiento: " + e.getMessage());
         }
         return null;
     }
@@ -166,7 +167,7 @@ public class MovimientoDao {
                 movimientos.add(movimiento);
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar movimiento: " + e.getMessage());
+            Consola.error("Error al buscar movimiento: " + e.getMessage());
         }
         return movimientos;
     }
@@ -202,7 +203,7 @@ public class MovimientoDao {
                 return movimiento;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar movimiento: " + e.getMessage());
+            Consola.error("Error al buscar movimiento: " + e.getMessage());
         }
         return null;
     }
@@ -239,7 +240,7 @@ public class MovimientoDao {
                 return movimiento;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar movimiento: " + e.getMessage());
+            Consola.error("Error al buscar movimiento: " + e.getMessage());
         }
         return null;
     }
@@ -258,7 +259,7 @@ public class MovimientoDao {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.out.println("Error al contar movimientos: " + e.getMessage());
+            Consola.error("Error al contar movimientos: " + e.getMessage());
         }
         return 0;
     }
@@ -274,7 +275,7 @@ public class MovimientoDao {
             pstmt.setInt(1, idPartida); 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al eliminar movimientos: " + e.getMessage());
+            Consola.error("Error al eliminar movimientos: " + e.getMessage());
         }
     }
 

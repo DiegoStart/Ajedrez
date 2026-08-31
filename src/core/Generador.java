@@ -87,12 +87,10 @@ public class Generador {
         if (ultimoMovimiento != null) {
             capturaAlPaso = (char)(ultimoMovimiento[3] + 'a') + "" + ((8 - ultimoMovimiento[2]) + (tablero.getEsTurnoBlanco() ? 1 : -1));
         }
-        System.out.println("El metodo fen regresa este fen " + posiciones + " " + turno + " " + enroque + " " + capturaAlPaso + " " + tablero.getCincuentaMovimientos() + " " + tablero.getContadorMovimientos());
         return posiciones + " " + turno + " " + enroque + " " + capturaAlPaso + " " + tablero.getCincuentaMovimientos() + " " + tablero.getContadorMovimientos();
     }
 
     public Tablero tablero(String fen) {
-        System.out.println("El fen recibido en el metodo tablero de generador fue " + fen);
         Tablero tablero = new Tablero();
         Pieza[][] piezas = new Pieza[8][8];
         String[] partes = fen.split(" ");
