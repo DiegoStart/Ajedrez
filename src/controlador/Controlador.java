@@ -233,7 +233,11 @@ public class Controlador {
     }
 
     public List<Partida> buscarPartidasEnCurso() {
-        return partidaDao.buscarPartidasEnCurso();
+        return partidaDao.buscarPorEstado("EN_CURSO");
+    }
+
+    public List<Partida> buscarPartidasEnPausa() {
+        return partidaDao.buscarPorEstado("EN_PAUSA");
     }
     //Metodos unicos de UsuarioDao
     public Usuario buscarPorCorreoUsuario(String correo) {
@@ -246,5 +250,9 @@ public class Controlador {
 
     public void actualizarUltimoAccesoUsuario(int idUsuario) {
         usuarioDao.actualizarUltimoAcceso(idUsuario);
+    }
+    //Eliminar Todo
+    public void eliminarTodo() {
+        partidaDao.eliminarTodo();
     }
 }

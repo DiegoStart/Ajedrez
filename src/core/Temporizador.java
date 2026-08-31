@@ -1,5 +1,7 @@
 package core;
 
+import consola.Consola;
+
 public class Temporizador extends Thread {
     private volatile int segundos;
     private volatile boolean pausado;
@@ -7,6 +9,8 @@ public class Temporizador extends Thread {
 
     public Temporizador(int segundos) {
         this.segundos = segundos;
+        pausado = true;
+        activo = true;
     }
 
     public void setSegundos(int segundos) {
@@ -43,7 +47,7 @@ public class Temporizador extends Thread {
                 Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
-            System.out.println("Temporizador interrumpido");
+            Consola.error("Temporizador interrumpido");
         }
     }
 }

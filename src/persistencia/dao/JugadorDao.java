@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import consola.Consola;
 import modelo.Jugador;
 import persistencia.Conexion;
 
@@ -50,7 +51,7 @@ public class JugadorDao {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Error al registrar jugador: " + e.getMessage());
+            Consola.error("Error al registrar jugador: " + e.getMessage());
         }
         return;
     }
@@ -66,7 +67,7 @@ public class JugadorDao {
             pstmt.setInt(1, idJugador); 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al eliminar jugador: " + e.getMessage());
+            Consola.error("Error al eliminar jugador: " + e.getMessage());
         }
         return;
     }
@@ -98,7 +99,7 @@ public class JugadorDao {
                 jugadores.add(jugador);
             }
         } catch (SQLException e) {
-            System.out.println("Error al mostrar jugadores guardados: " + e.getMessage());
+            Consola.error("Error al mostrar jugadores guardados: " + e.getMessage());
         }
         return jugadores;
     }
@@ -122,7 +123,7 @@ public class JugadorDao {
             pstmt.setInt(9, jugador.getIdJugador());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar jugador: " + e.getMessage());
+            Consola.error("Error al actualizar jugador: " + e.getMessage());
         }
     }
 
@@ -154,7 +155,7 @@ public class JugadorDao {
                 return jugador;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar jugador: " + e.getMessage());
+            Consola.error("Error al buscar jugador: " + e.getMessage());
         }
         return null;
     }
@@ -188,7 +189,7 @@ public class JugadorDao {
                 jugadores.add(jugador);
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar jugadores: " + e.getMessage());
+            Consola.error("Error al buscar jugadores: " + e.getMessage());
         }
         return jugadores;
     }
@@ -205,7 +206,7 @@ public class JugadorDao {
             pstmt.setInt(2, idJugador);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar jugador: " + e.getMessage());
+            Consola.error("Error al actualizar jugador: " + e.getMessage());
         }
     }
 
@@ -226,7 +227,7 @@ public class JugadorDao {
             pstmt.setInt(7, jugador.getIdJugador());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar jugador: " + e.getMessage());
+            Consola.error("Error al actualizar jugador: " + e.getMessage());
         }
     }
 }

@@ -7,7 +7,7 @@ public class Excepciones {
     private static Consola consola = new Consola();
 
     public static String leerLinea(String mensaje) {
-        System.out.print(mensaje);
+        consola.mensaje(mensaje);
         return sc.nextLine();
     }
 
@@ -17,7 +17,7 @@ public class Excepciones {
 
         while (!valido) {
             try {
-                System.out.println(mensaje);
+                consola.mensaje(mensaje);
                 numero = Integer.parseInt(sc.nextLine());
 
                 if (numero >= limInf && numero <= limSup) {
@@ -33,7 +33,7 @@ public class Excepciones {
     }
 
     public static String leerString(String mensaje) {
-        System.out.println(mensaje);
+        consola.mensaje(mensaje);
         return sc.nextLine();
     }
 
@@ -75,7 +75,7 @@ public class Excepciones {
         boolean valido = false;
 
         while (!valido) {
-            System.out.println(mensaje);
+            consola.mensaje(mensaje);
             linea = sc.nextLine().trim().toUpperCase();
 
             if (linea.equals("MENU")) {
