@@ -27,6 +27,8 @@ public class Tablero {
     private int colPromocion;
     // Repetición
     private HashMap<String, Integer> registro;
+    // Notacion Algebraica
+    private List<Pieza> candidatas;
 
     // CONSTRUCTOR
     public Tablero() {
@@ -116,6 +118,10 @@ public class Tablero {
 
     public void actualizarRegistro(String fen) {
         registro.put(fen, registro.getOrDefault(fen, 0) + 1);
+    }
+
+    public List<Pieza> getCandidatas() {
+        return candidatas;
     }
 
     // INICIALIZACIÓN 
@@ -267,6 +273,7 @@ public class Tablero {
             ultimoMovimiento = null;
         }
     // 12. Ejecutar movimiento
+        candidatas = desambiguacion(origen, filaDestino, colDestino);
         tablero[filaOrigen][colOrigen] = null;
         tablero[filaDestino][colDestino] = origen;
         origen.setFila(filaDestino);
@@ -681,7 +688,7 @@ public class Tablero {
     }
 
     // DATOS DEL MOVIMIENTO
-    public List<Pieza> desambiguacion(Pieza pieza, int filaDestino, int colDestino) {
+    private List<Pieza> desambiguacion(Pieza pieza, int filaDestino, int colDestino) {
         List<Pieza> candidatas = new ArrayList<>();
         for (int filaOrigen = 0; filaOrigen < 8; filaOrigen++) {
             for (int colOrigen = 0; colOrigen < 8; colOrigen++) {

@@ -3,6 +3,7 @@ package consola;
 import java.util.List;
 
 import core.Tablero;
+import core.Temporizador;
 import core.piezas.Alfil;
 import core.piezas.Caballo;
 import core.piezas.Peon;
@@ -10,12 +11,9 @@ import core.piezas.Pieza;
 import core.piezas.Reina;
 import core.piezas.Rey;
 import core.piezas.Torre;
-import modelo.Instantanea;
 import modelo.Jugador;
 import modelo.Movimiento;
-import modelo.Participacion;
 import modelo.Partida;
-import modelo.Usuario;
 
 public class Consola {
     private Tablero tablero;
@@ -28,7 +26,7 @@ public class Consola {
         return tablero;
     }
     
-    // MENSAJES GENÉRICOS
+    // Mensajes Genericos
     public void mensaje(String texto) {
         System.out.println(texto);
     }
@@ -37,15 +35,15 @@ public class Consola {
         System.out.printf(formato + "%n", args);
     }
 
-    public void casilla(int fila, int columna) {
-        mensaje("%c%d", (char) (columna + 'A'), 8 - fila);
+    public String casilla(int fila, int columna) {
+        return "" + (char) ('A' + columna) + (8 - fila);
     }
 
     public static void error(String texto) {
         System.err.println(texto);
     }
 
-    // MENÚS
+    // Menús
     public void titulo() {
         mensaje("""
 
@@ -58,7 +56,7 @@ public class Consola {
         """);
     }
     
-    public void mostrarMenuPrincipal() {
+    public void menuPrincipal() {
         titulo();
         mensaje("""
             ┌─ MENÚ PRINCIPAL ───────────────────────── ESTADO: OFFLINE ─┐                                                 
@@ -73,7 +71,7 @@ public class Consola {
             └────────────────────────────────────────────────────────────┘""");
     }
 
-    public void mostrarMenuJugador() {
+    public void menuJugador() {
         mensaje("""
             ┌─ MENÚ DE PAUSA ──────────┐
             │  [ 1 ]  Guardar y salir  │
@@ -82,7 +80,7 @@ public class Consola {
             └──────────────────────────┘""");
     }
 
-    public void mostrarContrincantes(Jugador blanca, Jugador negra) {
+    public void menuContrincantes(Jugador blanca, Jugador negra) {
         mensaje("""
             ┌─ JUGADORES ─────────────────────────────────────────────┐
             │  Blancas (B) > %-40s │
@@ -91,7 +89,7 @@ public class Consola {
             ¿Están listos para jugar? """, blanca.getNombreJugador(), negra.getNombreJugador());
     }
 
-    public void mostrarMenuPromocion() {
+    public void menuPromocion() {
         mensaje("""
             ┌─ PROMOCIÓN DE PEÓN ────────┐
             │  [ 1 ]  Reina   (Q)        │
@@ -102,47 +100,12 @@ public class Consola {
         );
     }
 
-    public void mostrarInformacionPartida(Partida partida) {
-        mensaje("========================================");
-        mensaje("         MODO REPRODUCCIÓN");
-        mensaje("========================================");
-        mensaje("ID: %d", partida.getIdPartida());
-        mensaje("Estado: %s", partida.getEstado());
-        mensaje("Resultado: %s", partida.getResultado());
-
-        if (partida.getCausaFinalizacion() != null) {
-            mensaje("Causa   : %s", partida.getCausaFinalizacion());
-        }
-
-        mensaje("Tipo de partida: %s", partida.getTipoPartida());
-        mensaje("Control de tiempo: %s", partida.getTiempoControl());
-        mensaje("========================================");
-        mensaje("");
-    }
-
-    public void mostrarEstadisticasJugador(Jugador jugador) {
-        mensaje("========================================");
-        mensaje("         MODO ESTADISTICO");
-        mensaje("========================================");
-        mensaje("Nombre: %s", jugador.getNombreJugador());
-        mensaje("Id: %d", jugador.getIdJugador());
-        mensaje("ELO: %d", jugador.getElo());
-        mensaje("Ganadas: %d", jugador.getVictorias());
-        mensaje("Perdidas: %d", jugador.getDerrotas());
-        mensaje("Tablas: %d", jugador.getTablas());
-        mensaje("Rendiciones: %d", jugador.getRendiciones());
-        mensaje("Abandonos: %d", jugador.getAbandonos());
-        mensaje("========================================");
-        mensaje("");
-    }
-
-    // TABLERO VISUAL
-    public void mostrarTablero(String nombreBlanco, String nombreNegro, boolean esTurnoBlanco, String estado) {
+    // Tablero
+    public void tablero(String nombreBlanco, String nombreNegro, boolean esTurnoBlanco, String estado, Temporizador tiempo) {
         String turnoActual = esTurnoBlanco ? "BLANCAS" : "NEGRAS";
-        String jugador = esTurnoBlanco ? nombreBlanco : nombreNegro;
         mensaje("┌─ PARTIDA: %-10s ────────────────── TURNO: %-7s ─┐", estado, turnoActual);
         mensaje("│ Blancas: %-18s  Negras: %-18s │", nombreBlanco, nombreNegro);
-        mensaje("└─────────────────────────────────────────────────────────┘\n");
+        mensaje("└─────────────────────────────────────────────────────────┘");
         mensaje("     A   B   C   D   E   F   G   H");
         mensaje("   ┌───┬───┬───┬───┬───┬───┬───┬───┐");
 
@@ -168,27 +131,23 @@ public class Consola {
             }
         }
         mensaje("     A   B   C   D   E   F   G   H");
-        mostrarUltimoMovimiento();
-        mensaje("Comandos: MENU | TABLAS | RENDIRSE");
-        mensaje("[" + jugador + "] > ");
+        ultimoMovimientoTiempo(tiempo);
     }
 
-    private void mostrarUltimoMovimiento() {
+    private void ultimoMovimientoTiempo(Temporizador tiempo) {
+        int minutos = tiempo.getSegundos() / 60;
+        int segundos = tiempo.getSegundos() % 60;
         if (tablero.getUltimoMovimiento() == null) {
-            mensaje("┌─ ÚLTIMO MOVIMIENTO ───────────────────────┐");
-            mensaje("│ Ninguno                                   │");
-            mensaje("└───────────────────────────────────────────┘");
+            mensaje("┌─ ÚLTIMO MOVIMIENTO ────┐┌─ TIEMPO ─────────────┐");
+            mensaje("│ Ninguno                ││ Quedan: %02d:%02d min    │", minutos, segundos);
+            mensaje("└────────────────────────┘└──────────────────────┘");
             return;
         }
 
         int[] ultimo = tablero.getUltimoMovimiento();
-        char colOrigen = (char) ('A' + ultimo[1]);
-        int filaOrigen = 8 - ultimo[0];
-        char colDestino = (char) ('A' + ultimo[3]);
-        int filaDestino = 8 - ultimo[2];
-        mensaje("┌─ ÚLTIMO MOVIMIENTO ───────────────────────┐");
-        mensaje("│ %c%d -> %c%d                                  │", colOrigen, filaOrigen, colDestino, filaDestino);
-        mensaje("└───────────────────────────────────────────┘");
+        mensaje("┌─ ÚLTIMO MOVIMIENTO ────┐┌ TIEMPO ──────────────┐");
+        mensaje("│ %s -> %-15s  ││ Quedan: %02d:%02d min    │", casilla(8 - ultimo[0], ultimo[1]), casilla(8 - ultimo[2], ultimo[3]), minutos, segundos);
+        mensaje("└────────────────────────┘└──────────────────────┘");
     }
 
     private String obtenerSimbolo(Pieza pieza) {
@@ -210,7 +169,52 @@ public class Consola {
         return pieza.getEsBlanca() ? simbolo : simbolo.toLowerCase();
     }
 
-    // TABLAS DE PARTIDAS
+    // Instantanea
+    
+    // Jugador
+    
+    // Movimiento
+    public void sinMovimientosGuardados() {
+        mensaje("""
+        ┌─ HISTORIAL DE MOVIMIENTOS ────────────────────────────────────────────────────┐
+        │                     -- No hay movimientos guardadas --                        │
+        └───────────────────────────────────────────────────────────────────────────────┘""");
+    }
+
+    public void movimientosRealizados(List<Movimiento> movimientos) {
+        if (movimientos == null || movimientos.isEmpty()) {
+            sinMovimientosGuardados();
+            return;
+        }
+
+        mensaje("┌─ HISTORIAL DE MOVIMIENTOS ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐");
+        mensaje("│ N°  │ COLOR   │ PIEZA     │ JUGADA   │ NOTACIÓN │ CAPTURA   │ TIPO             │ ESTADO                                                                 │");
+        mensaje("├─────┼─────────┼───────────┼──────────┼──────────┼───────────┼──────────────────┼────────────────────────────────────────────────────────────────────────┤");
+    
+        for (Movimiento movimiento : movimientos) {
+            String color = movimiento.getColor() ? "Blancas" : "Negras";
+            String origenDestino = (movimiento.getOrigen() != null && movimiento.getDestino() != null) ? casilla(movimiento.getOrigen()[0], movimiento.getOrigen()[1]) + " -> " + casilla(movimiento.getDestino()[0], movimiento.getDestino()[1]) : "N/A";   
+            String pieza = (movimiento.getPieza() != null) ? movimiento.getPieza() : "N/A";
+            String notacion = (movimiento.getNotacionAlgebraica() != null) ? movimiento.getNotacionAlgebraica() : "N/A";
+            String captura = (movimiento.getPiezaCapturada() != null) ? movimiento.getPiezaCapturada() : "-";
+            String tipo = (movimiento.getTipoMovimiento() != null) ? movimiento.getTipoMovimiento() : "Normal";
+            String estado = movimiento.getFen();
+            
+            if (movimiento.getJaqueMate()) {
+                estado = "Jaque Mate";
+            } else if (movimiento.getJaque()) {
+                estado = "Jaque";
+            } else if (movimiento.getCausaTablas() != null) {
+                estado = "Tablas (" + movimiento.getCausaTablas() + ")";
+            }
+            mensaje("│ %-3d │ %-7s │ %-9s │ %-8s │ %-8s │ %-9s │ %-16s │ %-70s │", movimiento.getNumeroMovimiento(), color, pieza, origenDestino, notacion, captura, tipo, estado);
+        }
+        mensaje("└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘");
+    }
+    
+    // Participacion
+    
+    // Partida
     public void sinPartidasGuardadas() {
         mensaje("""
         ┌─ PARTIDAS GUARDADAS ─────────────────────────────────────────────────────────┐
@@ -218,7 +222,7 @@ public class Consola {
         └──────────────────────────────────────────────────────────────────────────────┘""");
     }
 
-    public void mostrarPartidas(List<Partida> partidas) {
+    public void partidasPendientes(List<Partida> partidas) {
         if (partidas == null || partidas.isEmpty()) {
             sinPartidasGuardadas();
             return;
@@ -239,165 +243,26 @@ public class Consola {
         mensaje("└──────────────────────────────────────────────────────────────────────────────┘");
     }
 
-    // TABLAS DE MOVIMIENTOS
-    public void encabezadoMovimientos() {
-        mensaje("+-----+--------+----------+----------+----------+----------------+----------------+");
-        mensaje("| No. | Color  | Origen   | Destino  | Pieza    | Captura        | Notación       |");
-        mensaje("+-----+--------+----------+----------+----------+----------------+----------------+");
-    }
-
-    public void filaMovimiento(Movimiento movimiento) {
-        String color = movimiento.getColor() ? "Blancas" : "Negras";
-        String origen = convertirCoordenada(movimiento.getOrigen());
-        String destino = convertirCoordenada(movimiento.getDestino());
-        String captura = movimiento.getPiezaCapturada();
-
-        if (captura == null) {
-            captura = "-";
-        }
-        mensaje("| %-3d | %-6s | %-8s | %-8s | %-8s | %-14s | %-14s |", movimiento.getNumeroMovimiento(), color, origen, destino, movimiento.getPieza(), captura, movimiento.getNotacionAlgebraica());
-    }
-
-    public void sinMovimientos() {
-        mensaje("|                      No hay movimientos registrados                      |");
-    }
-
-    public void pieMovimientos() {
-        mensaje("+-----+--------+----------+----------+----------+----------------+----------------+");
-        mensaje("");
-    }
-
-    public void mostrarMovimientos(List<Movimiento> movimientos) {
-        if (movimientos == null || movimientos.isEmpty()) {
-            sinMovimientos();
+    public void partidasFinalizadas(List<Partida> partidas) {
+        if (partidas == null || partidas.isEmpty()) {
+            sinPartidasGuardadas();
             return;
         }
-        encabezadoMovimientos();
-        for (Movimiento movimiento : movimientos) {
-            filaMovimiento(movimiento);
+
+        mensaje("┌─ HISTORIAL DE PARTIDAS FINALIZADAS ───────────────────────────────────────┐");
+        mensaje("│ ID  │ FECHA FIN         │ TIPO     │ RESULTADO    │ CAUSA DE FINALIZACIÓN │");
+        mensaje("├─────┼───────────────────┼──────────┼──────────────┼───────────────────────┤");
+        java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        for (Partida p : partidas) {
+            String fecha = (p.getFechaFin() != null) ? p.getFechaFin().format(fmt) : (p.getFechaInicio() != null) ? p.getFechaInicio().format(fmt) : "N/A";
+            String tipo = (p.getTipoPartida() != null) ? p.getTipoPartida() : "LOCAL";
+            String resultado = (p.getResultado() != null) ? p.getResultado() : "N/A";
+            String causa = (p.getCausaFinalizacion() != null) ? p.getCausaFinalizacion() : "N/A";
+            mensaje("│ %-3d │ %-17s │ %-8s │ %-12s │ %-21s │", p.getIdPartida(), fecha, tipo, resultado, causa);
         }
-        pieMovimientos();
+        mensaje("└───────────────────────────────────────────────────────────────────────────┘");
     }
 
-    // TABLAS DE JUGADORES
-    public void encabezadoJugadores() {
-        mensaje("+----+------------------------------+");
-        mensaje("| ID | Nombre                       |");
-        mensaje("+----+------------------------------+");
-    }
-
-    public void filaJugador(Jugador jugador) {
-        mensaje("| %-2d | %-28s |", jugador.getIdJugador(), jugador.getNombreJugador());
-    }
-
-    public void sinJugadores() {
-        mensaje("| -- | No hay jugadores registrados |");
-    }
-
-    public void pieJugadores() {
-        mensaje("+----+------------------------------+");
-        mensaje("| 0  | Regresar                     |");
-        mensaje("+----+------------------------------+");
-    }
-
-    public void mostrarJugadores(List<Jugador> jugadores) {
-        if (jugadores == null || jugadores.isEmpty()) {
-            sinJugadores();
-            return;
-        }
-        encabezadoJugadores();
-        for (Jugador jugador : jugadores) {
-            filaJugador(jugador);
-        }
-        pieJugadores();
-    }
-
-    // PARTICIPACIONES
-    public void mostrarParticipaciones(List<Participacion> participaciones) {
-        if (participaciones == null || participaciones.isEmpty()) {
-            mensaje("No hay participaciones registradas.");
-            return;
-        }
-        mensaje("");
-        mensaje("========== PARTICIPACIONES ==========");
-
-        for (Participacion participacion : participaciones) {
-            mensaje("----------------------------------------");
-            mensaje("ID: %d", participacion.getIdParticipacion());
-            if (participacion.getPartida() != null) {
-                mensaje("Partida: %d", participacion.getPartida().getIdPartida());
-            }
-            if (participacion.getJugador() != null) {
-                mensaje("Jugador: %s", participacion.getJugador().getNombreJugador());
-            }
-            mensaje("Color: %s", participacion.getColor() ? "Blancas" : "Negras");
-            mensaje("Resultado: %s", participacion.getResultadoIndividual());
-            mensaje("Tiempo restante: %s", participacion.getTiempoRestante());
-        }
-
-        mensaje("----------------------------------------");
-    }
-
-    // INSTANTÁNEAS
-    public void mostrarInstantaneas(List<Instantanea> instantaneas) {
-        if (instantaneas == null || instantaneas.isEmpty()) {
-            mensaje("No hay instantáneas registradas.");
-            return;
-        }
-        mensaje("");
-        mensaje("========== INSTANTÁNEAS ==========");
-
-        for (Instantanea instantanea : instantaneas) {
-            mensaje("----------------------------------------");
-            mensaje("ID: %d", instantanea.getIdInstantanea());
-            if (instantanea.getPartida() != null) {
-                mensaje("Partida: %d", instantanea.getPartida().getIdPartida());
-            }
-            mensaje("Estado: %s", instantanea.getEstadoActual());
-            mensaje("Turno: %s", instantanea.getTurnoActual() ? "Blancas" : "Negras");
-            mensaje("Tiempo blancas: %s", instantanea.getTiempoBlancas());
-            mensaje("Tiempo negras: %s", instantanea.getTiempoNegras());
-            mensaje("Contador movimientos: %d", instantanea.getContadorMovimientos());
-            mensaje("50 movimientos: %s", instantanea.getCincuentaMovimientos());
-        }
-        mensaje("----------------------------------------");
-    }
-
-    // USUARIOS
-    public void mostrarUsuarios(List<Usuario> usuarios) {
-        if (usuarios == null || usuarios.isEmpty()) {
-            mensaje("No hay usuarios registrados.");
-            return;
-        }
-        mensaje("");
-        mensaje("========== USUARIOS ==========");
-
-        for (Usuario usuario : usuarios) {
-            mensaje("----------------------------------------");
-            mensaje("ID: %d", usuario.getIdUsuario());
-            mensaje("Nombre: %s", usuario.getNombreUsuario());
-            mensaje("Correo: %s", usuario.getCorreo());
-            mensaje("Fecha de nacimiento: %s", usuario.getFechaNacimiento());
-            mensaje("Género: %s", usuario.getGenero());
-            mensaje("Estado: %s", usuario.getEstado());
-            mensaje("Fecha de registro: %s", usuario.getFechaRegistro());
-            mensaje("Último acceso: %s", usuario.getUltimoAcceso());
-        }
-        mensaje("----------------------------------------");
-    }
-
-    // PARTIDAS EN CURSO
-    public void mostrarPartidasEnCurso(List<Partida> partidas) {
-        mostrarPartidas(partidas);
-    }
-
-    // CONVERSIONES
-    private String convertirCoordenada(int[] coordenada) {
-        if (coordenada == null || coordenada.length < 2) {
-            return "-";
-        }
-        char columna = (char) ('A' + coordenada[1]);
-        int fila = 8 - coordenada[0];
-        return "" + columna + fila;
-    }
+    // Usuario
 }

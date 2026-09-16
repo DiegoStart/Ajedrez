@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import consola.Consola;
 import modelo.Participacion;
 import persistencia.Conexion;
 
@@ -38,7 +39,7 @@ public class ParticipacionDao {
             pstmt.setInt(5, participacion.getTiempoRestante());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al registrar participacion: " + e.getMessage());
+            Consola.error("Error al registrar participacion: " + e.getMessage());
         }
     }
 
@@ -53,7 +54,7 @@ public class ParticipacionDao {
             pstmt.setInt(1, idParticipacion); 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al eliminar participacion: " + e.getMessage());
+            Consola.error("Error al eliminar participacion: " + e.getMessage());
         }
     }
 
@@ -77,7 +78,7 @@ public class ParticipacionDao {
                 participaciones.add(participacion);
             }
         } catch (SQLException e) {
-            System.out.println("Error al mostrar participaciones guardados: " + e.getMessage());
+            Consola.error("Error al mostrar participaciones guardados: " + e.getMessage());
         }
         return participaciones;
     }
@@ -95,7 +96,7 @@ public class ParticipacionDao {
             pstmt.setInt(3, participacion.getIdParticipacion());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar participacion: " + e.getMessage());
+            Consola.error("Error al actualizar participacion: " + e.getMessage());
         }
     }
 
@@ -120,7 +121,7 @@ public class ParticipacionDao {
                 return participacion;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar participacion: " + e.getMessage());
+            Consola.error("Error al buscar participacion: " + e.getMessage());
         }
         return null;
     }
@@ -147,7 +148,7 @@ public class ParticipacionDao {
                 participaciones.add(participacion);
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar participacion: " + e.getMessage());
+            Consola.error("Error al buscar participacion: " + e.getMessage());
         }
         return participaciones;
     }
@@ -174,7 +175,7 @@ public class ParticipacionDao {
                 participaciones.add(participacion);
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar participacion: " + e.getMessage());
+            Consola.error("Error al buscar participacion: " + e.getMessage());
         }
         return participaciones;
     }
@@ -201,7 +202,7 @@ public class ParticipacionDao {
                 return participacion;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar participacion: " + e.getMessage());
+            Consola.error("Error al buscar participacion: " + e.getMessage());
         }
         return null;
     }
@@ -220,7 +221,7 @@ public class ParticipacionDao {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.out.println("Error al contar participantes: " + e.getMessage());
+            Consola.error("Error al contar participaciones: " + e.getMessage());
         }
         return 0;
     }
@@ -237,7 +238,7 @@ public class ParticipacionDao {
             pstmt.setInt(2, participacion.getIdParticipacion());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar participacion: " + e.getMessage());
+            Consola.error("Error al actualizar participacion: " + e.getMessage());
         }
     }
 
@@ -253,7 +254,7 @@ public class ParticipacionDao {
             pstmt.setInt(2, participacion.getIdParticipacion());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar participacion: " + e.getMessage());
+            Consola.error("Error al actualizar participacion: " + e.getMessage());
         }
     }
 }

@@ -1,5 +1,7 @@
 package core;
 
+import java.util.List;
+
 import core.piezas.Alfil;
 import core.piezas.Caballo;
 import core.piezas.Peon;
@@ -7,6 +9,7 @@ import core.piezas.Pieza;
 import core.piezas.Reina;
 import core.piezas.Rey;
 import core.piezas.Torre;
+import modelo.Movimiento;
 
 public class Generador {
 
@@ -185,43 +188,95 @@ public class Generador {
         return tablero;
     }
 
-    /*public String notacionAlgebraica(Tablero tablero, Movimiento movimiento) {
-        String desambiguacion = desambiguacion(tablero.desambiguacion(null, 0, 0));
-        char columnaDestino = (char) ('a' + colDestino);
-        char columnaOrigen = (char) ('a' + colOrigen);
-        int fila = 8 - filaDestino;
+    public String notacionAlgebraica(List<Pieza> candidatas, Movimiento movimiento) {
+        String notacionAlgebraica = "";
+        String desambiguacion = "";
+        String inicial = "";
+        
+        // 1. Mapeo de coordenadas de la matriz 
+        char columnaDestino = (char) ('a' + movimiento.getDestino()[1]);
+        char columnaOrigen = (char) ('a' + movimiento.getOrigen()[1]);
+        int filaDestino = 8 - movimiento.getDestino()[0];
 
-        if (enroqueLargoCorto) {
-            notacionAlgebraica = colDestino == 6 ? "O-O" : "O-O-O";
-        } else if (capturaAlPaso) {
-            notacionAlgebraica = "" + columnaOrigen + "x" + columnaDestino + fila;
-        } else if (promocionPeon) {
-            if (captura) {
-                notacionAlgebraica = "" + columnaOrigen + "x" + columnaDestino + fila + "=" + piezaPromocion;
-            } else {
-                notacionAlgebraica = "" + columnaDestino + fila + "=" + piezaPromocion;
-            }
-        } else if (captura) {
-            if (pieza.equals("Peon")) {
-                notacionAlgebraica = "" + columnaOrigen + "x" + columnaDestino + fila;
-            } else {
-                notacionAlgebraica = inicialPieza() + desambiguacion + "x" + columnaDestino + fila;
-            }  
-        } else if (pieza.equals("Peon")) {
-            notacionAlgebraica = "" + columnaDestino + fila;
+        // 2. Desambiguacion
+        boolean columna = false;
+        boolean fila = false;
+        if (candidatas == null || candidatas.isEmpty()) {
+            desambiguacion = "";
         } else {
-            notacionAlgebraica = inicialPieza() + desambiguacion + columnaDestino + fila;
+            for (Pieza candidata : candidatas) {
+                if (candidata.getColumna() == movimiento.getOrigen()[1]) {
+                    columna = true;
+                }
+                if (candidata.getFila() == movimiento.getOrigen()[0]) {
+                    fila = true;
+                }
+            }
+
+            int filaOrigen = 8 - movimiento.getOrigen()[0];
+            if (!columna) {
+                desambiguacion = "" + columnaOrigen;
+            } else if (!fila) {
+                desambiguacion = "" + filaOrigen;
+            } else {
+                desambiguacion = "" + columnaOrigen + filaOrigen;
+            }
         }
 
-        if (jaqueMate) {
+        // 3. Elegir inicial
+        switch (movimiento.getPieza()) {
+            case "Rey":
+                inicial = "K";
+                break;
+            case "Reina":
+                inicial = "Q";
+                break;
+            case "Torre":
+                inicial = "R";
+                break;
+            case "Alfil":
+                inicial = "B";
+                break;
+            case "Caballo":
+                inicial = "N";
+                break;
+        }
+
+        // 4. Evaluación del tipo de jugada
+        if (movimiento.getTipoMovimiento().equals("ENROQUE_LARGO")) {
+            notacionAlgebraica = "O-O-O";
+        } else if (movimiento.getTipoMovimiento().equals("ENROQUE_CORTO")) {
+            notacionAlgebraica = "O-O";
+        } else if (movimiento.getTipoMovimiento().equals("CAPTURA_AL_PASO")) {
+            notacionAlgebraica = "" + columnaOrigen + "x" + columnaDestino + filaDestino;
+        } else if (movimiento.getTipoMovimiento().equals("PROMOCION")) {
+            if (movimiento.getPiezaCapturada() != null) {
+                notacionAlgebraica = "" + columnaOrigen + "x" + columnaDestino + filaDestino + "=" + movimiento.getPiezaPromocion();
+            } else {
+                notacionAlgebraica = "" + columnaDestino + filaDestino + "=" + movimiento.getPiezaPromocion();
+            }
+        } else if (movimiento.getPiezaCapturada() != null) {
+            if (movimiento.getPieza().equals("Peon")) {
+                notacionAlgebraica = "" + columnaOrigen + "x" + columnaDestino + filaDestino;
+            } else {
+                notacionAlgebraica = inicial + desambiguacion + "x" + columnaDestino + filaDestino;
+            }  
+        } else if (movimiento.getPieza().equals("Peon")) {
+            notacionAlgebraica = "" + columnaDestino + filaDestino;
+        } else {
+            notacionAlgebraica = inicial + desambiguacion + columnaDestino + filaDestino;
+        }
+
+        // 5. Adición de sufijo por Jaque (+) o Jaque Mate (#)
+        if (movimiento.getJaqueMate()) {
             notacionAlgebraica += "#";
-        } else if (jaque) {
+        } else if (movimiento.getJaque()) {
             notacionAlgebraica += "+";
         }
         return notacionAlgebraica;
     }
 
-    private String desambiguacion(List<Pieza> candidatas) {
+    private String desambiguacion(List<Pieza> candidatas, Movimiento movimiento) {
         if (candidatas == null || candidatas.isEmpty()) {
             return "";
         }
@@ -229,31 +284,27 @@ public class Generador {
         boolean columna = false;
         boolean fila = false;
         for (Pieza candidata : candidatas) {
-            if (candidata == pieza) {
-                continue;
-            }
-            if (candidata.getColumna() == pieza.getColumna()) {
+            if (candidata.getColumna() == movimiento.getOrigen()[1]) {
                 columna = true;
             }
-            if (candidata.getFila() == pieza.getFila()) {
+            if (candidata.getFila() == movimiento.getOrigen()[0]) {
                 fila = true;
             }
         }
 
-        char columnaOrigen = (char) ('a' + pieza.getColumna());
-        int filaOrigen = 8 - pieza.getFila();
+        char columnaOrigen = (char) ('a' + movimiento.getOrigen()[1]);
+        int filaOrigen = 8 - movimiento.getOrigen()[0];
         if (!columna) {
             return "" + columnaOrigen;
         }
         if (!fila) {
             return "" + filaOrigen;
         }
-
         return "" + columnaOrigen + filaOrigen;
     }
 
-    private String inicialPieza(Pieza pieza) {
-        switch (pieza.getNombre()) {
+    private String iniclialPieza(String pieza) {
+        switch (pieza) {
             case "Rey":
                 return "K";
             case "Reina":
@@ -269,5 +320,5 @@ public class Generador {
             default:
                 return "";
         }
-    }*/
+    }
 }

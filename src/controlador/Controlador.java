@@ -239,6 +239,10 @@ public class Controlador {
     public List<Partida> buscarPartidasEnPausa() {
         return partidaDao.buscarPorEstado("EN_PAUSA");
     }
+
+    public List<Partida> buscarPartidasFinalizada() {
+        return partidaDao.buscarPorEstado("FINALIZADA");
+    }
     //Metodos unicos de UsuarioDao
     public Usuario buscarPorCorreoUsuario(String correo) {
         return usuarioDao.buscarPorNombreUsuario(correo);

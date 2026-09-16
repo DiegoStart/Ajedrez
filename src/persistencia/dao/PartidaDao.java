@@ -253,7 +253,6 @@ public class PartidaDao {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.executeUpdate();
-            System.out.println("Tablas vaciadas correctamente.");
         } catch (SQLException e) {
             System.out.println("Error al vaciar las tablas: " + e.getMessage());
         }
