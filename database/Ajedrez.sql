@@ -71,17 +71,17 @@ CREATE TABLE movimiento (
     color BOOLEAN NOT NULL,
     pieza VARCHAR(20) NOT NULL,
     origen TEXT NOT NULL,
-	destino TEXT NOT NULL,
+    destino TEXT NOT NULL,
     pieza_capturada VARCHAR(20),
     tipo_movimiento VARCHAR(30) DEFAULT 'NORMAL',
     jaque BOOLEAN DEFAULT FALSE,
     jaque_mate BOOLEAN DEFAULT FALSE,
-    causa_tablas VARCHAR(50HAR(20),
+    causa_tablas VARCHAR(50),
     pieza_promocion VARCHAR(10),
     fen TEXT,
     fecha_movimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-),
-    notacion_algebraica VARC
+    notacion_algebraica VARCHAR(20),
+
     FOREIGN KEY (id_partida)
         REFERENCES partida(id_partida)
         ON DELETE CASCADE

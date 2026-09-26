@@ -3,20 +3,15 @@ package consola;
 import java.util.List;
 
 import core.Tablero;
-import core.Temporizador;
-import core.piezas.Alfil;
-import core.piezas.Caballo;
-import core.piezas.Peon;
-import core.piezas.Pieza;
-import core.piezas.Reina;
-import core.piezas.Rey;
-import core.piezas.Torre;
-import modelo.Jugador;
-import modelo.Movimiento;
-import modelo.Partida;
+import core.piezas.*;
+import modelo.*;
 
 public class Consola {
     private Tablero tablero;
+
+    public Consola() {
+        
+    }
 
     public void setTablero(Tablero tablero) {
         this.tablero = tablero;
@@ -101,7 +96,7 @@ public class Consola {
     }
 
     // Tablero
-    public void tablero(String nombreBlanco, String nombreNegro, boolean esTurnoBlanco, String estado, Temporizador tiempo) {
+    public void tablero(String nombreBlanco, String nombreNegro, boolean esTurnoBlanco, String estado, int tiempo) {
         String turnoActual = esTurnoBlanco ? "BLANCAS" : "NEGRAS";
         mensaje("┌─ PARTIDA: %-10s ────────────────── TURNO: %-7s ─┐", estado, turnoActual);
         mensaje("│ Blancas: %-18s  Negras: %-18s │", nombreBlanco, nombreNegro);
@@ -134,9 +129,9 @@ public class Consola {
         ultimoMovimientoTiempo(tiempo);
     }
 
-    private void ultimoMovimientoTiempo(Temporizador tiempo) {
-        int minutos = tiempo.getSegundos() / 60;
-        int segundos = tiempo.getSegundos() % 60;
+    private void ultimoMovimientoTiempo(int tiempo) {
+        int minutos = tiempo / 60;
+        int segundos = tiempo % 60;
         if (tablero.getUltimoMovimiento() == null) {
             mensaje("┌─ ÚLTIMO MOVIMIENTO ────┐┌─ TIEMPO ─────────────┐");
             mensaje("│ Ninguno                ││ Quedan: %02d:%02d min    │", minutos, segundos);
@@ -146,8 +141,32 @@ public class Consola {
 
         int[] ultimo = tablero.getUltimoMovimiento();
         mensaje("┌─ ÚLTIMO MOVIMIENTO ────┐┌ TIEMPO ──────────────┐");
-        mensaje("│ %s -> %-15s  ││ Quedan: %02d:%02d min    │", casilla(8 - ultimo[0], ultimo[1]), casilla(8 - ultimo[2], ultimo[3]), minutos, segundos);
+        mensaje("│ %s -> %-15s  ││ Quedan: %02d:%02d min    │", casilla(ultimo[0], ultimo[1]), casilla(ultimo[2], ultimo[3]), minutos, segundos);
         mensaje("└────────────────────────┘└──────────────────────┘");
+    }
+
+    public void alertaJaque(String nombreJugador, int[][] coordenadas) {
+        StringBuilder casillas = new StringBuilder();
+        String posicionRey = "??";
+        int contador = 0;
+        for (int fila = 0; fila < 8; fila++) {
+            for (int col = 0; col < 8; col++) {
+                if (coordenadas[fila][col] == 2) {
+                    posicionRey = casilla(fila, col);
+                } else if (coordenadas[fila][col] == 1) {
+                    casillas.append("[").append(casilla(fila, col)).append("] ");
+                    contador++;
+                }
+            }
+        }
+
+        String aviso = String.format("¡Cuidado %s! Tu Rey está en jaque.", nombreJugador);
+        String salidas = (contador == 0) ? "NO TIENES ESCAPATORIA" : casillas.toString().trim();    
+        String estado = String.format("Rey en [%s] | Salidas (%02d): %s", posicionRey, contador, salidas);
+        mensaje("┌─ ¡ALERTA DE JAQUE! ──────────────────────────────────────┐");
+        mensaje("│  %-55s │", aviso);
+        mensaje("│  %-55s │", estado);
+        mensaje("└──────────────────────────────────────────────────────────┘");
     }
 
     private String obtenerSimbolo(Pieza pieza) {
@@ -172,12 +191,123 @@ public class Consola {
     // Instantanea
     
     // Jugador
-    
+    public void sinJugadoresGuardados() {
+        mensaje("""
+        ┌─ REGISTRO DE JUGADORES ───────────────────────────────────────────────────────┐
+        │                       -- No hay jugadores guardados --                        │
+        └───────────────────────────────────────────────────────────────────────────────┘""");
+    }
+
+    public void mostrarJugadoresUsuario(List<Jugador> jugadores) {
+        if (jugadores == null || jugadores.isEmpty()) {
+            sinJugadoresGuardados();
+            return;
+        }
+
+        int[] resultados = new int[5];
+        for (Jugador jugador : jugadores) {
+            resultados[0] += jugador.getVictorias();
+            resultados[1] += jugador.getDerrotas();
+            resultados[2] += jugador.getTablas();
+            resultados[3] += jugador.getRendiciones();
+            resultados[4] += jugador.getAbandonos();
+        }
+        int totalResultados = 0;
+        for (int resultado : resultados) {
+            totalResultados += resultado;
+        }
+
+        boolean[][] rendimiento = new boolean[4][5];
+        if (totalResultados > 0) {
+            for (int columna = 0; columna < 5; columna++) {
+                double porcentaje = resultados[columna] * 100.0 / totalResultados;
+                int altura = (int) Math.round((porcentaje / 100.0) * 4);
+                for (int fila = 0; fila < altura; fila++) {
+                    rendimiento[3 - fila][columna] = true;
+                }
+            }
+        }
+
+        int[] rangos = new int[5];
+        for (Jugador jugador : jugadores) {
+            int elo = jugador.getElo();
+            if (elo < 1000) {
+                rangos[0]++;
+            } else if (elo < 1200) {
+                rangos[1]++;
+            } else if (elo < 1400) {
+                rangos[2]++;
+            } else if (elo < 1600) {
+                rangos[3]++;
+            } else {
+                rangos[4]++;
+            }
+        }
+
+        int maximo = 0;
+        for (int rango : rangos) {
+            if (rango > maximo) {
+                maximo = rango;
+            }
+        }
+        if (maximo == 0) {
+            maximo = 1;
+        }
+
+        boolean[][] distribucion = new boolean[4][5];
+        for (int columna = 0; columna < 5; columna++) {
+            int altura = (int) Math.round((rangos[columna] * 4.0) / maximo);
+            for (int fila = 0; fila < altura; fila++) {
+                distribucion[3 - fila][columna] = true;
+            }
+        }
+
+        mensaje("┌─ Rendimiento Global ────────────────────┬─ Distribución por ELO ─────────────────┐");
+        String[] niveles = {"100%", " 75%", " 50%", " 25%"};
+        for (int fila = 0; fila < 4; fila++) {
+            StringBuilder izquierda = new StringBuilder();
+            izquierda.append(String.format("%4s ┤ ", niveles[fila]));
+            for (int columna = 0; columna < 5; columna++) {
+                izquierda.append(rendimiento[fila][columna] ? "█" : " ");
+                izquierda.append("    ");
+            }
+            StringBuilder derecha = new StringBuilder();
+            derecha.append("    "); 
+            for (int columna = 0; columna < 5; columna++) {
+                String simbolo = distribucion[fila][columna] ? "█" : " ";
+                derecha.append("  ").append(simbolo).append("   "); 
+            }
+            derecha.append("  ");
+            mensaje("│ %-39s │ %-38s │", izquierda, derecha);
+        }
+        mensaje("│       VIC  DER  TAB  REN  ABA           │    <1000  1000  1200  1400  1600+      │");
+        mensaje("├─────────────────────────────────────────┴────────────────────────────────────────┤");
+        mensaje("│ # REGISTRO DE JUGADORES                                                          │");
+        mensaje("├──────────────────────────────────────────────────────────────────────────────────┤");
+
+        for (int x = 0; x < jugadores.size(); x++) {
+            Jugador jugador = jugadores.get(x);
+            int partidas = jugador.getVictorias() + jugador.getDerrotas() + jugador.getTablas() + jugador.getRendiciones() + jugador.getAbandonos();
+            double porcentaje = partidas > 0 ? jugador.getVictorias() * 100.0 / partidas : 0.0;
+            int bloques = (int) Math.round((porcentaje / 100.0) * 10);
+            String barra = "█".repeat(bloques) + "░".repeat(10 - bloques);
+            String nombre = jugador.getNombreJugador() != null ? jugador.getNombreJugador().toUpperCase() : "SIN_NOMBRE";
+            if (nombre.length() > 8) {
+                nombre = nombre.substring(0, 6) + "..";
+            }
+            int progreso = (int) Math.round(porcentaje);
+            String informacion = String.format(" > %-8s ─ %4d ELO ─ [%s] %3d%% ─ (%3dV · %3dD · %3dT · %3dR · %3dA)",
+                nombre, jugador.getElo(), barra, progreso, jugador.getVictorias(), jugador.getDerrotas(), jugador.getTablas(), jugador.getRendiciones(), jugador.getAbandonos());
+            mensaje("│ %-80s │", informacion);
+        }
+        mensaje("└──────────────────────────────────────────────────────────────────────────────────┘");
+    }
+
     // Movimiento
     public void sinMovimientosGuardados() {
         mensaje("""
         ┌─ HISTORIAL DE MOVIMIENTOS ────────────────────────────────────────────────────┐
-        │                     -- No hay movimientos guardadas --                        │
+        │                     -- No hay movimientos realizados --                       │
         └───────────────────────────────────────────────────────────────────────────────┘""");
     }
 
@@ -190,26 +320,52 @@ public class Consola {
         mensaje("┌─ HISTORIAL DE MOVIMIENTOS ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐");
         mensaje("│ N°  │ COLOR   │ PIEZA     │ JUGADA   │ NOTACIÓN │ CAPTURA   │ TIPO             │ ESTADO                                                                 │");
         mensaje("├─────┼─────────┼───────────┼──────────┼──────────┼───────────┼──────────────────┼────────────────────────────────────────────────────────────────────────┤");
-    
         for (Movimiento movimiento : movimientos) {
+            int numeroMovimiento = movimiento.getColor() ? movimiento.getNumeroMovimiento() : movimiento.getNumeroMovimiento() - 1;
             String color = movimiento.getColor() ? "Blancas" : "Negras";
             String origenDestino = (movimiento.getOrigen() != null && movimiento.getDestino() != null) ? casilla(movimiento.getOrigen()[0], movimiento.getOrigen()[1]) + " -> " + casilla(movimiento.getDestino()[0], movimiento.getDestino()[1]) : "N/A";   
             String pieza = (movimiento.getPieza() != null) ? movimiento.getPieza() : "N/A";
             String notacion = (movimiento.getNotacionAlgebraica() != null) ? movimiento.getNotacionAlgebraica() : "N/A";
             String captura = (movimiento.getPiezaCapturada() != null) ? movimiento.getPiezaCapturada() : "-";
             String tipo = (movimiento.getTipoMovimiento() != null) ? movimiento.getTipoMovimiento() : "Normal";
-            String estado = movimiento.getFen();
-            
-            if (movimiento.getJaqueMate()) {
-                estado = "Jaque Mate";
-            } else if (movimiento.getJaque()) {
-                estado = "Jaque";
-            } else if (movimiento.getCausaTablas() != null) {
-                estado = "Tablas (" + movimiento.getCausaTablas() + ")";
-            }
-            mensaje("│ %-3d │ %-7s │ %-9s │ %-8s │ %-8s │ %-9s │ %-16s │ %-70s │", movimiento.getNumeroMovimiento(), color, pieza, origenDestino, notacion, captura, tipo, estado);
+            String estado = movimiento.getFen();  
+            mensaje("│ %-3d │ %-7s │ %-9s │ %-8s │ %-8s │ %-9s │ %-16s │ %-70s │", numeroMovimiento, color, pieza, origenDestino, notacion, captura, tipo, estado);
         }
         mensaje("└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘");
+    }
+    
+    public void alertaMovimiento(Movimiento movimiento) {
+        if (movimiento == null) {
+            return;
+        }
+        String caso = movimiento.getTipoMovimiento();
+        if ("NORMAL".equalsIgnoreCase(caso)) {
+            return;
+        }
+
+        String informacion = "";
+        switch (caso) {
+            case "CAPTURA":
+                informacion = movimiento.getPieza() + (movimiento.getColor() ? " Blanco" : " Negro") + " capturó al " + movimiento.getPiezaCapturada() + (movimiento.getColor() ? " Negro" : " Blanco");
+                break;
+            case "ENROQUE_LARGO":
+                informacion = "Se realizó enroque largo (0-0-0)";
+                break;
+            case "ENROQUE_CORTO":
+                informacion = "Se realizó enroque corto (0-0)";
+                break;
+            case "CAPTURA_AL_PASO":
+                informacion = movimiento.getPieza() + (movimiento.getColor() ? " Blanco" : " Negro") + " realizó captura al paso";
+                break;
+            case "PROMOCION":
+                informacion = "¡El Peón se coronó exitosamente!";
+                break;
+        }
+        if (!informacion.isEmpty()) {
+            mensaje("┌─ EVENTO DE JUGADA ──────────────────────────────────────┐");
+            mensaje("│  >> %-51s │", informacion);
+            mensaje("└─────────────────────────────────────────────────────────┘");
+        }
     }
     
     // Participacion
@@ -249,7 +405,7 @@ public class Consola {
             return;
         }
 
-        mensaje("┌─ HISTORIAL DE PARTIDAS FINALIZADAS ───────────────────────────────────────┐");
+        mensaje("┌─ PARTIDAS GUARDADAS ──────────────────────────────────────────────────────┐");
         mensaje("│ ID  │ FECHA FIN         │ TIPO     │ RESULTADO    │ CAUSA DE FINALIZACIÓN │");
         mensaje("├─────┼───────────────────┼──────────┼──────────────┼───────────────────────┤");
         java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -262,6 +418,19 @@ public class Consola {
             mensaje("│ %-3d │ %-17s │ %-8s │ %-12s │ %-21s │", p.getIdPartida(), fecha, tipo, resultado, causa);
         }
         mensaje("└───────────────────────────────────────────────────────────────────────────┘");
+    }
+
+    public void mostrarFinPartida(String causa) {
+        String texto = String.format("PARTIDA FINALIZADA ── CAUSA: %s", causa);
+        mensaje("┌──────────────────────────────────────────────────────────┐");
+        mensaje("│  %-56s│", texto);
+        mensaje("└──────────────────────────────────────────────────────────┘");
+    }
+
+    public void mostrarEstadoActualPartida() {
+        mensaje("┌──────────────────────────────────────────────────────────┐");
+        mensaje("│  %-56s│", "ESTADO ACTUAL DEL TABLERO");
+        mensaje("└──────────────────────────────────────────────────────────┘");
     }
 
     // Usuario

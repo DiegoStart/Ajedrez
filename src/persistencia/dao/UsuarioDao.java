@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import consola.Consola;
 import modelo.Usuario;
 import persistencia.Conexion;
 
@@ -42,7 +43,7 @@ public class UsuarioDao {
             pstmt.setTimestamp(7, Timestamp.valueOf(usuario.getUltimoAcceso()));
             pstmt.setString(8, usuario.getEstado());
         } catch (SQLException e) {
-            System.out.println("Error al registrar usuario: " + e.getMessage());
+            Consola.error("Error al registrar usuario: " + e.getMessage());
         }
     }
 
@@ -57,7 +58,7 @@ public class UsuarioDao {
             pstmt.setInt(1, idUsuario); 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al eliminar usuario: " + e.getMessage());
+            Consola.error("Error al eliminar usuario: " + e.getMessage());
         }
     }
 
@@ -87,7 +88,7 @@ public class UsuarioDao {
                 usuarios.add(usuario);
             }
         } catch (SQLException e) {
-            System.out.println("Error al mostrar usuarios guardados: " + e.getMessage());
+            Consola.error("Error al mostrar usuarios guardados: " + e.getMessage());
         }
         return usuarios;
     }
@@ -115,7 +116,7 @@ public class UsuarioDao {
             pstmt.setInt(9, usuario.getIdUsuario());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar usuario: " + e.getMessage());
+            Consola.error("Error al actualizar usuario: " + e.getMessage());
         }
     }
 
@@ -146,7 +147,7 @@ public class UsuarioDao {
                 return usuario;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar usuario: " + e.getMessage());
+            Consola.error("Error al buscar usuario: " + e.getMessage());
         }
         return null;
     }
@@ -178,7 +179,7 @@ public class UsuarioDao {
                 return usuario;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar usuario por correo: " + e.getMessage());
+            Consola.error("Error al buscar usuario por correo: " + e.getMessage());
         }
         return null;
     }
@@ -210,7 +211,7 @@ public class UsuarioDao {
                 return usuario;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar usuario por nombre: " + e.getMessage());
+            Consola.error("Error al buscar usuario por nombre: " + e.getMessage());
         }
         return null;
     }
@@ -227,7 +228,7 @@ public class UsuarioDao {
             pstmt.setInt(2, idUsuario);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar ultimo acceso: " + e.getMessage());
+            Consola.error("Error al actualizar ultimo acceso: " + e.getMessage());
         }
     }
 }

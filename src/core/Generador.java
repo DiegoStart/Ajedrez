@@ -1,15 +1,10 @@
 package core;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import core.piezas.Alfil;
-import core.piezas.Caballo;
-import core.piezas.Peon;
-import core.piezas.Pieza;
-import core.piezas.Reina;
-import core.piezas.Rey;
-import core.piezas.Torre;
-import modelo.Movimiento;
+import core.piezas.*;
+import modelo.*;
 
 public class Generador {
 
@@ -276,49 +271,44 @@ public class Generador {
         return notacionAlgebraica;
     }
 
-    private String desambiguacion(List<Pieza> candidatas, Movimiento movimiento) {
-        if (candidatas == null || candidatas.isEmpty()) {
-            return "";
+    public String pgn(Partida partida, List<Participacion> participaciones, List<Movimiento> movimientos) {
+        StringBuilder pgn = new StringBuilder();
+        // Seven Tag Roster (Obligatorios)
+        pgn.append("[Event \"Ajedrez Alpha\"]\n");
+        pgn.append("[Site \"Oaxaca, México\"]\n");
+        pgn.append("[Date \"" + partida.getFechaInicio().format(DateTimeFormatter.ofPattern("yyyy.MM.dd")) + "\"]\n");
+        pgn.append("[Round \"?\"]\n");
+        pgn.append("[White \"" + participaciones.get(0).getJugador().getNombreJugador() + "\"]\n");
+        pgn.append("[Black \"" + participaciones.get(1).getJugador().getNombreJugador() + "\"]\n");
+        pgn.append("[Result \"" + (partida.getResultado() == null ? "*" : partida.getResultado()) + "\"]\n");
+        pgn.append("\n");
+        // Información adicional
+        pgn.append("[WhiteElo \"" + participaciones.get(0).getJugador().getElo() + "\"]\n");
+        pgn.append("[BlackElo \"" + participaciones.get(1).getJugador().getElo() + "\"]\n");
+        pgn.append("[WhiteTitle \"-\"]\n");
+        pgn.append("[BlackTitle \"-\"]\n");
+        pgn.append("[TimeControl \"" + partida.getTiempoControl() + "\"]\n");
+        if (partida.getCausaFinalizacion() != null) {
+            pgn.append("[Termination \"" + partida.getCausaFinalizacion() + "\"]\n");
         }
+        pgn.append("[Annotator \"Ajedrez Alpha\"]\n");
+        pgn.append("[ECO \"-\"]\n");
+        pgn.append("[Opening \"-\"]\n");
+        pgn.append("[Variation \"-\"]\n");
+        pgn.append("[PlyCount \"" + movimientos.size() + "\"]\n");
+        pgn.append("[SetUp \"0\"]\n");
+        pgn.append("[Link \"https://github.com/DiegoStart/Ajedrez\"]\n");
+        pgn.append("\n");
 
-        boolean columna = false;
-        boolean fila = false;
-        for (Pieza candidata : candidatas) {
-            if (candidata.getColumna() == movimiento.getOrigen()[1]) {
-                columna = true;
-            }
-            if (candidata.getFila() == movimiento.getOrigen()[0]) {
-                fila = true;
-            }
+        for (Movimiento movimiento : movimientos) {
+            if (movimiento.getColor()) {
+                pgn.append(movimiento.getNumeroMovimiento());
+                pgn.append(". ");
+            }          
+            pgn.append(movimiento.getNotacionAlgebraica());
+            pgn.append(" ");
         }
-
-        char columnaOrigen = (char) ('a' + movimiento.getOrigen()[1]);
-        int filaOrigen = 8 - movimiento.getOrigen()[0];
-        if (!columna) {
-            return "" + columnaOrigen;
-        }
-        if (!fila) {
-            return "" + filaOrigen;
-        }
-        return "" + columnaOrigen + filaOrigen;
-    }
-
-    private String iniclialPieza(String pieza) {
-        switch (pieza) {
-            case "Rey":
-                return "K";
-            case "Reina":
-                return "Q";
-            case "Torre":
-                return "R";
-            case "Alfil":
-                return "B";
-            case "Caballo":
-                return "N";
-            case "Peon":
-                return "";
-            default:
-                return "";
-        }
+        pgn.append(partida.getResultado() == null ? "*" : partida.getResultado());
+        return pgn.toString();
     }
 }

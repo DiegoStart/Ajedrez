@@ -23,10 +23,10 @@ public class Excepciones {
                 if (numero >= limInf && numero <= limSup) {
                     valido = true;
                 } else {
-                    consola.mensaje("Error: Ingresa una opción válida.");
+                    Consola.error("Error: Ingresa una opción válida.");
                 }
             } catch (NumberFormatException e) {
-                consola.mensaje("Error: Ingresa un número entero válido.");
+                Consola.error("Error: Ingresa un número entero válido.");
             }
         }
         return numero;
@@ -63,7 +63,7 @@ public class Excepciones {
                     valido = true;
                 }
             } else {
-                consola.mensaje("Error: Solo se permiten letras y debe tener al menos 3 caracteres.");
+                Consola.error("Error: Solo se permiten letras y debe tener al menos 3 caracteres.");
             }
         }
         return texto;
@@ -107,7 +107,7 @@ public class Excepciones {
                     esCasillaValida(partes[1])) {
                     valido = true;
                 } else {
-                    consola.mensaje("Error: Ingresa un movimiento válido (ej: E2 E4) o escribe MENU, RENDIRSE, TABLAS, ACEPTO o RECHAZO.");
+                    Consola.error("Error: Ingresa un movimiento válido (ej: E2 E4) o escribe MENU, RENDIRSE, TABLAS, ACEPTO o RECHAZO.");
                 }
             }
         }

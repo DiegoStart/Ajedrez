@@ -4,13 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import core.piezas.Alfil;
-import core.piezas.Caballo;
-import core.piezas.Peon;
-import core.piezas.Pieza;
-import core.piezas.Reina;
-import core.piezas.Rey;
-import core.piezas.Torre;
+import core.piezas.*;
 import modelo.Movimiento;
 
 public class Tablero {
@@ -117,7 +111,9 @@ public class Tablero {
     }
 
     public void actualizarRegistro(String fen) {
-        registro.put(fen, registro.getOrDefault(fen, 0) + 1);
+        String posicion = fen.substring(0, fen.lastIndexOf(" "));
+        posicion = posicion.substring(0, posicion.lastIndexOf(" "));
+        registro.put(posicion, registro.getOrDefault(posicion, 0) + 1);
     }
 
     public List<Pieza> getCandidatas() {
@@ -177,7 +173,6 @@ public class Tablero {
         }
     // 4. Crear movimiento
         Movimiento movimiento = new Movimiento();
-        movimiento.setNumeroMovimiento(contadorMovimientos);
         movimiento.setColor(origen.getEsBlanca());
         movimiento.setPieza(origen.getNombre());
         movimiento.setOrigen(new int[]{filaOrigen, colOrigen});
@@ -290,9 +285,6 @@ public class Tablero {
         }
     // 14. Cambiar turno
         esTurnoBlanco = !esTurnoBlanco;
-    // 15. Registrar posición
-        if (!hayPromocion) {
-        }
         return movimiento;
     }
 
@@ -492,7 +484,7 @@ public class Tablero {
         return legal;
     }
 
-    public boolean estaEnJaque(boolean esBlanca) {
+    public boolean estaEnJaque(boolean esBlanca) { // Recibe el color del rey que quieres comprobar
         int filaRey = -1;
         int colRey = -1;
         for (int fila = 0; fila < 8; fila++) {
@@ -552,26 +544,22 @@ public class Tablero {
         return true; // JAQUE MATE
     }
 
-    public String EscapeDelRey(boolean esBlanca) {
+    public int[][] EscapeDelRey(boolean esBlanca) {
+        int[][] coordenadas = new int[8][8];
         int filaRey = -1;
         int colRey = -1;
 
         for (int fila = 0; fila < 8; fila++) {
             for (int columna = 0; columna < 8; columna++) {
                 Pieza rey = tablero[fila][columna];
-
                 if (rey instanceof Rey && rey.getEsBlanca() == esBlanca) {
                     filaRey = fila;
                     colRey = columna;
+                    coordenadas[filaRey][colRey] = 2;
                     break;
                 }
             }
         }
-
-        StringBuilder mensaje = new StringBuilder();
-        mensaje.append("Posición del rey ").append(esBlanca ? "blanco" : "negro").append(": ")
-            .append((char) ('A' + colRey)).append(8 - filaRey).append("\n");
-        mensaje.append(" # Posibles movimientos:\n");
 
         for (int fila = 0; fila < 8; fila++) {
             for (int columna = 0; columna < 8; columna++) {
@@ -588,11 +576,11 @@ public class Tablero {
                     continue;
                 }
                 if (Simulacion(filaRey, colRey, fila, columna)) {
-                    mensaje.append((char) ('A' + columna)).append(8 - fila).append("\n");
+                    coordenadas[fila][columna] = 1;
                 }
             }
         }
-        return mensaje.toString();
+        return coordenadas;
     }
     
     // TABLAS Y FINALIZACIÓN
@@ -684,7 +672,9 @@ public class Tablero {
     }
 
     public boolean tablasTripleRepeticion(String fen) {
-        return registro.getOrDefault(fen, 0) >= 3;
+        String posicion = fen.substring(0, fen.lastIndexOf(" "));
+        posicion = posicion.substring(0, posicion.lastIndexOf(" "));
+        return registro.getOrDefault(posicion, 0) >= 3;
     }
 
     // DATOS DEL MOVIMIENTO

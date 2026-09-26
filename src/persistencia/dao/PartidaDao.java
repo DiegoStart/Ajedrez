@@ -58,7 +58,7 @@ public class PartidaDao {
             pstmt.setInt(1, idPartida); 
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al eliminar partida: " + e.getMessage());
+            Consola.error("Error al eliminar partida: " + e.getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ public class PartidaDao {
                 partidas.add(partida);
             }
         } catch (SQLException e) {
-            System.out.println("Error al mostrar partidas guardadas: " + e.getMessage());
+            Consola.error("Error al mostrar partidas guardadas: " + e.getMessage());
         }
         return partidas;
     }
@@ -111,7 +111,7 @@ public class PartidaDao {
             pstmt.setInt(5, partida.getIdPartida());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar partida: " + e.getMessage());
+            Consola.error("Error al actualizar partida: " + e.getMessage());
         }
     }
 
@@ -141,7 +141,7 @@ public class PartidaDao {
                 return partida;
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar partida: " + e.getMessage());
+            Consola.error("Error al buscar partida: " + e.getMessage());
         }
         return null;
     }
@@ -173,7 +173,7 @@ public class PartidaDao {
                 partidas.add(partida);
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar partida: " + e.getMessage());
+            Consola.error("Error al buscar partida: " + e.getMessage());
         }
         return partidas;
     }
@@ -205,7 +205,7 @@ public class PartidaDao {
                 partidas.add(partida);
             }
         } catch (SQLException e) {
-            System.out.println("Error al buscar partida: " + e.getMessage());
+            Consola.error("Error al buscar partida: " + e.getMessage());
         }
         return partidas;
     }
@@ -224,7 +224,7 @@ public class PartidaDao {
             pstmt.setInt(4, partida.getIdPartida());
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar partida: " + e.getMessage());
+            Consola.error("Error al actualizar partida: " + e.getMessage());
         }
     }
 
@@ -240,7 +240,7 @@ public class PartidaDao {
             pstmt.setInt(2, idPartida);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al actualizar partida: " + e.getMessage());
+            Consola.error("Error al actualizar partida: " + e.getMessage());
         }
     }
 
@@ -254,7 +254,7 @@ public class PartidaDao {
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Error al vaciar las tablas: " + e.getMessage());
+            Consola.error("Error al vaciar las tablas: " + e.getMessage());
         }
     }
 }

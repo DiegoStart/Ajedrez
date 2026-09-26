@@ -1,11 +1,10 @@
 package app;
 
-import consola.Consola;
-import consola.Excepciones;
+import java.util.List;
+
+import consola.*;
 import controlador.Controlador;
-import core.Generador;
-import core.Tablero;
-import core.Temporizador;
+import core.*;
 import modelo.*;
 
 public class AjedrezAlpha {
@@ -15,13 +14,16 @@ public class AjedrezAlpha {
 
         while (true) {
             consola.menuPrincipal();
-            int opcion = Excepciones.leerNumero("Elige una opción", -1, 3);
+            int opcion = Excepciones.leerNumero("Elige una opción", -1, 6);
             switch (opcion) {
                 case -1:
                     eliminar(controlador, consola);
                     break;
                 case 0:
-                    consola.mensaje("Saliendo....... Gracias por jugar.");
+                    consola.mensaje("┌─ APAGANDO CONSOLA ─────────────────────────────────────────┐");
+                    consola.mensaje("│  >> Desconectando...                                       │");
+                    consola.mensaje("│  >> ¡Gracias por jugar!                                    │");
+                    consola.mensaje("└────────────────────────────────────────────────────────────┘");
                     return;
                 case 1:
                     iniciarNuevaPartida(controlador, consola);
@@ -30,7 +32,16 @@ public class AjedrezAlpha {
                     cargarPartida(controlador, consola);
                     break;
                 case 3:
-                    historialPartidas(controlador, consola);
+                    historialPartida(controlador, consola);
+                    break;
+                case 4:
+                    recrearPartida(controlador, consola);
+                    break;
+                case 5:
+                    exportarPartida(controlador, consola);
+                    break;
+                case 6:
+                    mostrarEstadisticas(controlador, consola);
                     break;
             }
         }
@@ -109,7 +120,7 @@ public class AjedrezAlpha {
                 } else {
                     partida = controlador.buscarPartida(idPartida);
                     if (partida.getEstado().equals("FINALIZADA")) {
-                        consola.mensaje("Partida Finalizada...");
+                        consola.mensaje("── [ PARTIDA FINALIZADA ] ──────────────────────────────────");
                     }   
                 }
             } while (partida.getEstado().equals("FINALIZADA"));
@@ -117,33 +128,126 @@ public class AjedrezAlpha {
 
         Instantanea instantanea = controlador.buscarPorPartidaInstantanea(idPartida);
         if (instantanea == null) {
-            consola.mensaje("La partida no tiene una instantánea guardada.");
+            Consola.error("La partida no tiene una instantánea guardada.");
             return;
         }
         
         Tablero tablero = generador.tablero(instantanea.getEstadoActual());
         if (tablero != null) {
+            for (Movimiento movimiento : controlador.buscarPorPartidaMovimiento(idPartida)) {
+                tablero.actualizarRegistro(movimiento.getFen());
+            }
             jugarPartida(controlador, consola, tablero, partida, instantanea);
         } else {
-            consola.mensaje("Error a cargar tablero");
+            Consola.error("Error a cargar tablero");
         }
     }
 
-    public static void historialPartidas(Controlador controlador, Consola consola) {
+    public static void historialPartida(Controlador controlador, Consola consola) {
         int idPartida = 0;
         consola.partidasFinalizadas(controlador.buscarPartidasFinalizada());
 
         if (controlador.buscarPartidasFinalizada().isEmpty()) {
             return;
         } else {  
-            idPartida = Excepciones.leerNumero("Elige una partida", 0, controlador.mostrarPartidas().size());
-            if (idPartida == 0) {
-                return;
-            }
+            do {
+                idPartida = Excepciones.leerNumero("Elige una partida", 0, controlador.mostrarPartidas().size());
+                if (idPartida == 0) {
+                    return;
+                } else {
+                    if (!controlador.buscarPartida(idPartida).getEstado().equals("FINALIZADA")) {
+                        consola.mensaje("── [ PARTIDA PENDIENTE ] ──────────────────────────────────");
+                    }   
+                }
+            } while (!controlador.buscarPartida(idPartida).getEstado().equals("FINALIZADA"));
         }
         consola.movimientosRealizados(controlador.buscarPorPartidaMovimiento(idPartida));
     }
+
+    public static void recrearPartida(Controlador controlador, Consola consola) {
+        Generador generador = new Generador();
+        Partida partida = null;
+        int idPartida = 0;
+        int posicion = 0;
+        consola.partidasFinalizadas(controlador.mostrarPartidas());
+        if (controlador.mostrarPartidas().isEmpty()) {
+            return;
+        } else {   
+            idPartida = Excepciones.leerNumero("Elige una partida", 0, controlador.mostrarPartidas().size());
+            if (idPartida == 0) {
+                return;
+            } else {
+                partida = controlador.buscarPartida(idPartida);    
+            }
+        }
+
+        Jugador blanco = controlador.buscarPorPartidaYColorParticipacion(idPartida, true).getJugador();
+        Jugador negro = controlador.buscarPorPartidaYColorParticipacion(idPartida, false).getJugador();   
+        List<Movimiento> movimientos = controlador.buscarPorPartidaMovimiento(idPartida);
+        if (movimientos.isEmpty()) {
+            consola.sinMovimientosGuardados();
+            return;
+        }
+
+        while (posicion < movimientos.size()) {
+            consola.setTablero(generador.tablero(movimientos.get(posicion).getFen()));
+            consola.tablero(blanco.getNombreJugador(), negro.getNombreJugador(), movimientos.get(posicion).getColor(), partida.getEstado(), 0);
+            if (posicion == movimientos.size() - 1 && partida.getEstado().equals("FINALIZADA")) {
+                consola.mostrarFinPartida(partida.getCausaFinalizacion());
+            } else if (posicion == movimientos.size() - 1) {
+                consola.mostrarEstadoActualPartida();
+            }
+            int opcion = Excepciones.leerNumero("[1] Siguiente [2] Anterior [3] Ir al inicio [4] Ir al final [0] Salir", 0, 4);
+        
+            switch (opcion) {
+                case 0:
+                    return ;
+                case 1:
+                    if (posicion < movimientos.size() - 1) {
+                        posicion++;
+                    }
+                    break;
+                case 2:
+                    if (posicion > 0) {
+                        posicion--;
+                    }
+                    break;
+                case 3:
+                    posicion = 0;
+                    break;
+                case 4:
+                    posicion = movimientos.size() - 1;
+                    break;
+            }
+        }
+    }
     
+    public static void exportarPartida(Controlador controlador, Consola consola) {
+        Generador generador = new Generador();
+        Partida partida = null;
+        int idPartida = 0;
+        consola.partidasFinalizadas(controlador.mostrarPartidas());
+
+        if (controlador.mostrarPartidas().isEmpty()) {
+            return;
+        } else {   
+            idPartida = Excepciones.leerNumero("Elige una partida", 0, controlador.mostrarPartidas().size());
+            if (idPartida == 0) {
+                return;
+            } else {
+                partida = controlador.buscarPartida(idPartida);     
+            }
+        }
+
+        List<Participacion> participaciones = controlador.buscarPorPartidaParticipacion(idPartida);
+        List<Movimiento> movimientos = controlador.buscarPorPartidaMovimiento(idPartida);
+        consola.mensaje(generador.pgn(partida, participaciones, movimientos));
+    }
+
+    public static void mostrarEstadisticas(Controlador controlador, Consola consola) {
+        consola.mostrarJugadoresUsuario(controlador.mostrarJugadores());
+    }
+
     private static void eliminar(Controlador controlador, Consola consola) {
         controlador.eliminarTodo();
         consola.mensaje("Se elimino toda informacion guardada.");
@@ -166,15 +270,15 @@ public class AjedrezAlpha {
             negras.reanudar();
             blancas.pausar();
         }
-
+        
+        Jugador blanco = participacionBlancas.getJugador();
+        Jugador negro = participacionNegras.getJugador();
         while (true) {
             Jugador jugador = tablero.getEsTurnoBlanco() ? participacionBlancas.getJugador() : participacionNegras.getJugador();
-            Jugador blanco = participacionBlancas.getJugador();
-            Jugador negro = participacionNegras.getJugador();
             controlador.actualizarEstadoPartida(partida.getIdPartida(), "EN_CURSO");
             partida.setEstado("EN_CURSO");
             Temporizador tiempo = tablero.getEsTurnoBlanco() ? blancas : negras;
-            consola.tablero(blanco.getNombreJugador(), negro.getNombreJugador(), tablero.getEsTurnoBlanco(), partida.getEstado(), tiempo);
+            consola.tablero(blanco.getNombreJugador(), negro.getNombreJugador(), tablero.getEsTurnoBlanco(), partida.getEstado(), tiempo.getSegundos());
 
             if (verificarFin(controlador, consola, tablero, partida, participacionBlancas, participacionNegras,instantanea, blancas, negras)) {
                 break;
@@ -183,8 +287,9 @@ public class AjedrezAlpha {
             if (negras.tiempoAgotado()) {
                 int eloGanador = blanco.getElo();
                 int eloPerdedor = negro.getElo();
-                consola.mensaje("¡Se Acabó! %s pierde por tiempo.", negro.getNombreJugador());
-                consola.mensaje("Ganador: %s", blanco.getNombreJugador());
+                consola.mensaje("── [ TIEMPO AGOTADO ] ──────────────────────────────────────");
+                consola.mensaje(">> %s pierde por tiempo | GANADOR: %s", negro.getNombreJugador(), blanco.getNombreJugador());
+                consola.mensaje("────────────────────────────────────────────────────────────");
                 partida.setCausaFinalizacion("TIEMPO_AGOTADO");
                 partida.setResultado("1-0");
                 blanco.registrarVictoria();
@@ -200,8 +305,9 @@ public class AjedrezAlpha {
             if (blancas.tiempoAgotado()) {
                 int eloGanador = negro.getElo();
                 int eloPerdedor = blanco.getElo();
-                consola.mensaje("¡Se Acabó! %s pierde por tiempo.", blanco.getNombreJugador());
-                consola.mensaje("Ganador: %s", negro.getNombreJugador());
+                consola.mensaje("── [ TIEMPO AGOTADO ] ──────────────────────────────────────");
+                consola.mensaje(">> %s pierde por tiempo | GANADOR: %s", blanco.getNombreJugador(), negro.getNombreJugador());
+                consola.mensaje("────────────────────────────────────────────────────────────");
                 partida.setCausaFinalizacion("TIEMPO_AGOTADO");
                 partida.setResultado("0-1");
                 partida.setEstado("FINALIZADA");
@@ -253,8 +359,9 @@ public class AjedrezAlpha {
         int eloBlanco = blanco.getElo();
         int eloNegro = negro.getElo();
         if (tablero.tablasAhogado(tablero.getEsTurnoBlanco())) {
-            consola.mensaje("¡Alto! Ya no hay movimientos validos");
-            consola.mensaje("¡Fin del Juego! Tablas por ahogado.");
+            consola.mensaje("── [ AHOGADO: TABLAS ] ─────────────────────────────────────");
+            consola.mensaje(">> ¡Alto! Sin movimientos válidos disponibles. Fin del juego.");
+            consola.mensaje("────────────────────────────────────────────────────────────");
             partida.setCausaFinalizacion("AHOGADO");
             partida.setResultado("1/2-1/2");
             blanco.registrarTablas();
@@ -270,8 +377,9 @@ public class AjedrezAlpha {
         }
 
         if (tablero.tablasMaterialInsuficiente()) {
-            consola.mensaje("¡Alto! Ya no hay piezas suficientes para continuar");
-            consola.mensaje("¡Fin del Juego! Tablas por material insuficiente.");
+            consola.mensaje("── [ MATERIAL INSUFICIENTE: TABLAS ] ───────────────────────");
+            consola.mensaje(">> ¡Alto! No hay piezas suficientes. Fin del juego.");
+            consola.mensaje("────────────────────────────────────────────────────────────");
             partida.setCausaFinalizacion("MATERIAL_INSUFICIENTE");
             partida.setResultado("1/2-1/2");
             blanco.registrarTablas();
@@ -287,8 +395,9 @@ public class AjedrezAlpha {
         }
 
         if (tablero.tablasCincuentaMovimientos()) {
-            consola.mensaje("¡Alto! Han transcurrido 50 movimientos sin capturas ni movimientos de peón.");
-            consola.mensaje("¡Fin del Juego! Tablas por regla de los 50 movimientos.");
+            consola.mensaje("── [ REGLA DE LOS 50 MOVIMIENTOS: TABLAS ] ─────────────────");
+            consola.mensaje(">> ¡Alto! 50 jugadas sin capturas ni avance de peón. Fin.");
+            consola.mensaje("────────────────────────────────────────────────────────────");
             partida.setCausaFinalizacion("50_MOVIMIENTOS");
             partida.setResultado("1/2-1/2");
             blanco.registrarTablas();
@@ -302,10 +411,11 @@ public class AjedrezAlpha {
             controlador.finalizarPartidaPartida(partida);
             return true;
         }
-
-        /*if (tablero.tablasTripleRepeticion("agregar el fen")) {
-            consola.mensaje("¡Alto! Ya no hay movimientos válidos.");
-            consola.mensaje("¡Fin del Juego! Tablas por triple repetición.");
+        
+        if (tablero.tablasTripleRepeticion(instantanea.getEstadoActual())) {
+            consola.mensaje("── [ TRIPLE REPETICIÓN: TABLAS ] ──────────────────────────");
+            consola.mensaje(">> ¡Alto! Posición repetida 3 veces. Fin del juego.");
+            consola.mensaje("────────────────────────────────────────────────────────────");
             partida.setCausaFinalizacion("TRIPLE_REPETICION");
             partida.setResultado("1/2-1/2");
             blanco.registrarTablas();
@@ -318,21 +428,19 @@ public class AjedrezAlpha {
             controlador.actualizarEstadisticas(negro);
             controlador.finalizarPartidaPartida(partida);
             return true;
-        }*/
+        }
 
         if (tablero.estaEnJaque(tablero.getEsTurnoBlanco())) {
             Jugador jugador = tablero.getEsTurnoBlanco() ? blanco : negro;
-            consola.mensaje("¡Cuidado %s! tu Rey está en jaque.", jugador.getNombreJugador());
-            consola.mensaje(tablero.EscapeDelRey(tablero.getEsTurnoBlanco()));
-
+            consola.alertaJaque(jugador.getNombreJugador(), tablero.EscapeDelRey(tablero.getEsTurnoBlanco()));
             if (tablero.estaJaqueMate(tablero.getEsTurnoBlanco())) {
                 Jugador ganador = tablero.getEsTurnoBlanco() ? negro : blanco;
                 String resultado = tablero.getEsTurnoBlanco() ? "0-1" : "1-0";
                 int eloGanador = ganador.getElo();
                 int eloPerdedor = jugador.getElo();
-                consola.mensaje("¡Jaque mate! %s ha perdido.", jugador.getNombreJugador());
-                consola.mensaje("Ganador: %s", ganador.getNombreJugador());
-
+                consola.mensaje("── [ ¡JAQUE MATE! ] ────────────────────────────────────────");
+                consola.mensaje(">> %s ha perdido | GANADOR: %s", jugador.getNombreJugador(), ganador.getNombreJugador());
+                consola.mensaje("────────────────────────────────────────────────────────────");
                 partida.setCausaFinalizacion("JAQUE_MATE");
                 partida.setResultado(resultado);
                 ganador.registrarVictoria();
@@ -361,27 +469,31 @@ public class AjedrezAlpha {
             Movimiento movimiento = tablero.moverPieza(filaOrigen, colOrigen, filaDestino, colDestino);
 
             if (movimiento == null) {
-                consola.mensaje("Movimiento inválido.");
+                consola.mensaje("── [ ERROR: MOVIMIENTO INVÁLIDO ] ─────────────────────────");
                 return false;
             }
+            consola.alertaMovimiento(movimiento);
             if (tablero.getHayPromocion()) {
                 consola.menuPromocion();
                 int tipo = Excepciones.leerNumero("Elige una pieza:", 1, 4);
                 movimiento.setPiezaPromocion(tablero.promocionPeon(tipo).getNombre());
             }
+            if (!movimiento.getColor()) {
+                tablero.aumentarContadorMovimientos();
+            } 
 
+            movimiento.setJaque(tablero.estaEnJaque(!movimiento.getColor()));
+            movimiento.setJaqueMate(tablero.estaJaqueMate(!movimiento.getColor()));
+            movimiento.setNumeroMovimiento(tablero.getContadorMovimientos());    
             movimiento.setNotacionAlgebraica(generador.notacionAlgebraica(tablero.getCandidatas(), movimiento));
             movimiento.setPartida(partida);
             movimiento.setFen(generador.fen(tablero));
-            controlador.registrarMovimiento(movimiento);
-            
-            if (!movimiento.getColor()) {
-                tablero.aumentarContadorMovimientos();
-            }           
+            tablero.actualizarRegistro(generador.fen(tablero));
+            controlador.registrarMovimiento(movimiento);  
             controlador.actualizarPartida(partida);
             return true;
         } catch (Exception e) {
-            consola.mensaje("Error al mover: " + e.getMessage());
+            Consola.error("Error al mover: " + e.getMessage());
             return false;
         }
     }
@@ -403,12 +515,13 @@ public class AjedrezAlpha {
                 partida.setEstado("EN_PAUSA");
                 actualizarInstantanea(controlador, tablero, instantanea, blancas, negras);
                 controlador.actualizarPartida(partida);
-                consola.mensaje("Partida %d guardada.", partida.getIdPartida());
+                consola.mensaje("┌─ GUARDADO EXITOSO ───────────────────────────────────────┐");
+                consola.mensaje("│  >> Partida #%d guardada correctamente.                   │", partida.getIdPartida());
+                consola.mensaje("└──────────────────────────────────────────────────────────┘");
                 return true;
             case 2 :
-                consola.mensaje("%s ha propuesto REINICIAR.", proponente.getNombreJugador());
+                consola.mensaje("── [ PROPUESTA DE REINICIO: %s ] ─────────────────", proponente.getNombreJugador());
                 String[] respuesta = Excepciones.leerMovimiento(oponente.getNombreJugador() + " ¿Aceptas? (ACEPTO/RECHAZO)");
-
                 if (respuesta[0].equals("ACEPTO")) {
                     int tiempo = 600;
                     tablero.iniciarPartidaEnBlanco();
@@ -426,9 +539,9 @@ public class AjedrezAlpha {
                     tablero.setCincuentaMovimientos(0);
                     controlador.eliminarPorPartidaMovimiento(partida.getIdPartida());
                     actualizarInstantanea(controlador, tablero, instantanea, blancas, negras);
-                    consola.mensaje("Reiniciando la partida...");
+                    consola.mensaje("── [ REINICIANDO PARTIDA... ] ──────────────────────────────");
                 } else {
-                    consola.mensaje("%s ha rechazado REINICIAR.", oponente.getNombreJugador());
+                    consola.mensaje("── [ REINICIO RECHAZADO: %s ] ─────────────────", oponente.getNombreJugador());
                 }
                 return false;
             case 3:
@@ -447,9 +560,9 @@ public class AjedrezAlpha {
                 Jugador ganador = oponente;
 
                 String resultado = tablero.getEsTurnoBlanco() ? "0-1" : "1-0";
-                consola.mensaje("¡Fin del Juego! %s se ha rendido.", perdedor.getNombreJugador());
-                consola.mensaje("Ganador: %s", ganador.getNombreJugador());
-
+                consola.mensaje("── [ RENDICIÓN: FIN DEL JUEGO ] ────────────────────────────");
+                consola.mensaje(">> %s se ha rendido | GANADOR: %s", perdedor.getNombreJugador(), ganador.getNombreJugador());
+                consola.mensaje("────────────────────────────────────────────────────────────");
                 partida.setCausaFinalizacion("RENDICION");
                 partida.setResultado(resultado);
                 partida.setEstado("FINALIZADA");
@@ -466,11 +579,11 @@ public class AjedrezAlpha {
                 controlador.finalizarPartidaPartida(partida);
                 return true;
             case "TABLAS":
-                consola.mensaje("%s ha propuesto TABLAS.", proponente.getNombreJugador());
+                consola.mensaje("── [ PROPUESTA DE TABLAS: %s ] ──────────────────", proponente.getNombreJugador());
                 String[] respuesta = Excepciones.leerMovimiento(oponente.getNombreJugador() + " ¿Aceptas? (ACEPTO/RECHAZO)");
 
                 if (respuesta[0].equals("ACEPTO")) {
-                    consola.mensaje("¡Se acabó! Tablas por acuerdo mutuo.");
+                    consola.mensaje("── [ TABLAS POR ACUERDO MUTUO ] ────────────────────────────");
                     proponente.registrarTablas();
                     oponente.registrarTablas();
                     int eloProponente = proponente.getElo();
@@ -488,7 +601,7 @@ public class AjedrezAlpha {
                     controlador.finalizarPartidaPartida(partida);
                     return true;
                 }
-                consola.mensaje("%s ha rechazado TABLAS.", oponente.getNombreJugador());
+                consola.mensaje("── [ TABLAS RECHAZADAS: %s ] ─────────────────", oponente.getNombreJugador());
             return false;
         }
         return false;
