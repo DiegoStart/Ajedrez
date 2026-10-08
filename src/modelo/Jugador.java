@@ -132,8 +132,7 @@ public class Jugador {
     public void registrarAbandonos() {
         abandonos++;
     }
-    
-    
+     
     public void modificarElo(int eloContrario, double resultado) {
         double esperado = 1.0 / (1 + Math.pow(10, (eloContrario - elo) / 400.0));
         int k = 32;

@@ -2,18 +2,8 @@ package controlador;
 
 import java.util.List;
 
-import modelo.Instantanea;
-import modelo.Jugador;
-import modelo.Movimiento;
-import modelo.Participacion;
-import modelo.Partida;
-import modelo.Usuario;
-import persistencia.dao.InstantaneaDao;
-import persistencia.dao.JugadorDao;
-import persistencia.dao.MovimientoDao;
-import persistencia.dao.ParticipacionDao;
-import persistencia.dao.PartidaDao;
-import persistencia.dao.UsuarioDao;
+import modelo.*;
+import persistencia.dao.*;
 
 public class Controlador {
     private InstantaneaDao instantaneaDao;

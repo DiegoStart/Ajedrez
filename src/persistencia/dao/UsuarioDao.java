@@ -29,7 +29,7 @@ public class UsuarioDao {
             return;
         }
 
-        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, usuario.getNombreUsuario());
             pstmt.setString(2, usuario.getCorreo());
             pstmt.setString(3, usuario.getContrasena());
@@ -42,6 +42,13 @@ public class UsuarioDao {
             pstmt.setString(6, usuario.getFotoPerfil());
             pstmt.setTimestamp(7, Timestamp.valueOf(usuario.getUltimoAcceso()));
             pstmt.setString(8, usuario.getEstado());
+            if (pstmt.executeUpdate() > 0) {
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        usuario.setIdUsuario(rs.getInt(1));
+                    }
+                }
+            }
         } catch (SQLException e) {
             Consola.error("Error al registrar usuario: " + e.getMessage());
         }
