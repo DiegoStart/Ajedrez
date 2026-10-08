@@ -87,6 +87,9 @@ public class Excepciones {
             } else if (linea.equals("RENDIRSE")) {
                 partes = new String[] {"RENDIRSE"};
                 valido = true;
+            } else if (linea.equals("RECLAMAR")) {
+                partes = new String[] {"RECLAMAR"};
+                valido = true;
             } else if (linea.equals("TABLAS")) {
                 partes = new String[] {"TABLAS"};
                 valido = true;

@@ -56,12 +56,12 @@ public class AjedrezAlpha {
         int tiempo = 600;
         
         while (!listo) {
-            String nombreBlanco = Excepciones.leerNombre("Nombre del jugador blanco:");
-            String nombreNegro = Excepciones.leerNombre("Nombre del jugador negro:");
+            String nombreBlanco = Excepciones.leerNombre("[+] Jugador BLANCO >> ");
+            String nombreNegro  = Excepciones.leerNombre("[+] Jugador NEGRO  >> ");
             jugadorBlanco.setNombreJugador(nombreBlanco);
             jugadorNegro.setNombreJugador(nombreNegro);
             consola.menuContrincantes(jugadorBlanco, jugadorNegro);
-            int confirmacion = Excepciones.leerNumero("1. Sí  2. No", 1, 2);
+            int confirmacion = Excepciones.leerNumero(" > [1] SÍ  │  [2] NO > ", 1, 2);
             
             if (confirmacion == 1) {
                 controlador.registrarJugador(jugadorBlanco);
@@ -321,15 +321,15 @@ public class AjedrezAlpha {
                 break;
             }
 
-            String[] partes = Excepciones.leerMovimiento("[" + jugador.getNombreJugador() + "] > mueve (ej: E2 E4 | RENDIRSE | TABLAS | MENU):");
-            if (partes[0].equals("MENU")) {
+            boolean reclamacion = tablero.tablasTripleRepeticion(instantanea.getEstadoActual()) || tablero.tablasCincuentaMovimientos();
+            String[] partes = Excepciones.leerMovimiento(String.format("[%s] %s > ", jugador.getNombreJugador(), reclamacion ? "¡Puedes RECLAMAR tablas! (o E2 E4 | MENU)" : "Mueve (ej: E2 E4 | TABLAS | RENDIRSE | MENU)"));if (partes[0].equals("MENU")) {
                 if (comandosDelMenu(controlador, consola, jugador, tablero, partida, instantanea, participacionBlancas, participacionNegras, blancas, negras)) {
                     break;
                 }
                 continue;
             }
 
-            if (partes[0].equals("RENDIRSE") || partes[0].equals("TABLAS")) {
+            if (partes[0].equals("RENDIRSE") || partes[0].equals("TABLAS") || (partes[0].equals("RECLAMAR") && reclamacion)) {
                 if (comandosDelJuego(controlador, consola, partes, tablero, partida, participacionBlancas, participacionNegras)) {
                     break;
                 }
@@ -358,78 +358,6 @@ public class AjedrezAlpha {
         Jugador negro = controlador.buscarJugador(participacionNegra.getJugador().getIdJugador());
         int eloBlanco = blanco.getElo();
         int eloNegro = negro.getElo();
-        if (tablero.tablasAhogado(tablero.getEsTurnoBlanco())) {
-            consola.mensaje("── [ AHOGADO: TABLAS ] ─────────────────────────────────────");
-            consola.mensaje(">> ¡Alto! Sin movimientos válidos disponibles. Fin del juego.");
-            consola.mensaje("────────────────────────────────────────────────────────────");
-            partida.setCausaFinalizacion("AHOGADO");
-            partida.setResultado("1/2-1/2");
-            blanco.registrarTablas();
-            negro.registrarTablas();
-            blanco.modificarElo(eloNegro, 0.5);
-            negro.modificarElo(eloBlanco, 0.5);
-            actualizarInstantanea(controlador, tablero, instantanea, blancas, negras);
-            controlador.actualizarPartida(partida);
-            controlador.actualizarEstadisticas(blanco);
-            controlador.actualizarEstadisticas(negro);
-            controlador.finalizarPartidaPartida(partida);
-            return true;
-        }
-
-        if (tablero.tablasMaterialInsuficiente()) {
-            consola.mensaje("── [ MATERIAL INSUFICIENTE: TABLAS ] ───────────────────────");
-            consola.mensaje(">> ¡Alto! No hay piezas suficientes. Fin del juego.");
-            consola.mensaje("────────────────────────────────────────────────────────────");
-            partida.setCausaFinalizacion("MATERIAL_INSUFICIENTE");
-            partida.setResultado("1/2-1/2");
-            blanco.registrarTablas();
-            negro.registrarTablas();
-            blanco.modificarElo(eloNegro, 0.5);
-            negro.modificarElo(eloBlanco, 0.5);
-            actualizarInstantanea(controlador, tablero, instantanea, blancas, negras);
-            controlador.actualizarPartida(partida);
-            controlador.actualizarEstadisticas(blanco);
-            controlador.actualizarEstadisticas(negro);
-            controlador.finalizarPartidaPartida(partida);
-            return true;
-        }
-
-        if (tablero.tablasCincuentaMovimientos()) {
-            consola.mensaje("── [ REGLA DE LOS 50 MOVIMIENTOS: TABLAS ] ─────────────────");
-            consola.mensaje(">> ¡Alto! 50 jugadas sin capturas ni avance de peón. Fin.");
-            consola.mensaje("────────────────────────────────────────────────────────────");
-            partida.setCausaFinalizacion("50_MOVIMIENTOS");
-            partida.setResultado("1/2-1/2");
-            blanco.registrarTablas();
-            negro.registrarTablas();
-            blanco.modificarElo(eloNegro, 0.5);
-            negro.modificarElo(eloBlanco, 0.5);
-            actualizarInstantanea(controlador, tablero, instantanea, blancas, negras);
-            controlador.actualizarPartida(partida);
-            controlador.actualizarEstadisticas(blanco);
-            controlador.actualizarEstadisticas(negro);
-            controlador.finalizarPartidaPartida(partida);
-            return true;
-        }
-        
-        if (tablero.tablasTripleRepeticion(instantanea.getEstadoActual())) {
-            consola.mensaje("── [ TRIPLE REPETICIÓN: TABLAS ] ──────────────────────────");
-            consola.mensaje(">> ¡Alto! Posición repetida 3 veces. Fin del juego.");
-            consola.mensaje("────────────────────────────────────────────────────────────");
-            partida.setCausaFinalizacion("TRIPLE_REPETICION");
-            partida.setResultado("1/2-1/2");
-            blanco.registrarTablas();
-            negro.registrarTablas();
-            blanco.modificarElo(eloNegro, 0.5);
-            negro.modificarElo(eloBlanco, 0.5);
-            actualizarInstantanea(controlador, tablero, instantanea, blancas, negras);
-            controlador.actualizarPartida(partida);
-            controlador.actualizarEstadisticas(blanco);
-            controlador.actualizarEstadisticas(negro);
-            controlador.finalizarPartidaPartida(partida);
-            return true;
-        }
-
         if (tablero.estaEnJaque(tablero.getEsTurnoBlanco())) {
             Jugador jugador = tablero.getEsTurnoBlanco() ? blanco : negro;
             consola.alertaJaque(jugador.getNombreJugador(), tablero.EscapeDelRey(tablero.getEsTurnoBlanco()));
@@ -455,6 +383,78 @@ public class AjedrezAlpha {
                 controlador.finalizarPartidaPartida(partida);
                 return true;
             }
+        }
+        
+        if (tablero.tablasAhogado(tablero.getEsTurnoBlanco())) {
+            consola.mensaje("── [ AHOGADO: TABLAS ] ─────────────────────────────────────");
+            consola.mensaje(">> ¡Alto! Sin movimientos válidos disponibles. Fin del juego.");
+            consola.mensaje("────────────────────────────────────────────────────────────");
+            partida.setCausaFinalizacion("AHOGADO");
+            partida.setResultado("1/2-1/2");
+            blanco.registrarTablas();
+            negro.registrarTablas();
+            blanco.modificarElo(eloNegro, 0.5);
+            negro.modificarElo(eloBlanco, 0.5);
+            actualizarInstantanea(controlador, tablero, instantanea, blancas, negras);
+            controlador.actualizarPartida(partida);
+            controlador.actualizarEstadisticas(blanco);
+            controlador.actualizarEstadisticas(negro);
+            controlador.finalizarPartidaPartida(partida);
+            return true;
+        }
+
+        if (tablero.tablasMaterialInsuficiente(instantanea.getEstadoActual())) {
+            consola.mensaje("── [ MATERIAL INSUFICIENTE: TABLAS ] ───────────────────────");
+            consola.mensaje(">> ¡Alto! No hay piezas suficientes. Fin del juego.");
+            consola.mensaje("────────────────────────────────────────────────────────────");
+            partida.setCausaFinalizacion("MATERIAL_INSUFICIENTE");
+            partida.setResultado("1/2-1/2");
+            blanco.registrarTablas();
+            negro.registrarTablas();
+            blanco.modificarElo(eloNegro, 0.5);
+            negro.modificarElo(eloBlanco, 0.5);
+            actualizarInstantanea(controlador, tablero, instantanea, blancas, negras);
+            controlador.actualizarPartida(partida);
+            controlador.actualizarEstadisticas(blanco);
+            controlador.actualizarEstadisticas(negro);
+            controlador.finalizarPartidaPartida(partida);
+            return true;
+        }
+
+        if (tablero.tablasSetentaYCincoMovimientos()) {
+            consola.mensaje("── [ REGLA DE LOS 75 MOVIMIENTOS: TABLAS ] ─────────────────");
+            consola.mensaje(">> ¡Alto! 75 jugadas sin capturas ni avance de peón. Fin.");
+            consola.mensaje("────────────────────────────────────────────────────────────");
+            partida.setCausaFinalizacion("75_MOVIMIENTOS");
+            partida.setResultado("1/2-1/2");
+            blanco.registrarTablas();
+            negro.registrarTablas();
+            blanco.modificarElo(eloNegro, 0.5);
+            negro.modificarElo(eloBlanco, 0.5);
+            actualizarInstantanea(controlador, tablero, instantanea, blancas, negras);
+            controlador.actualizarPartida(partida);
+            controlador.actualizarEstadisticas(blanco);
+            controlador.actualizarEstadisticas(negro);
+            controlador.finalizarPartidaPartida(partida);
+            return true;
+        }
+        
+        if (tablero.tablasQuintaRepeticion(instantanea.getEstadoActual())) {
+            consola.mensaje("── [ QUINTA REPETICIÓN: TABLAS ] ───────────────────────────");
+            consola.mensaje(">> ¡Alto! Posición repetida 5 veces. Fin del juego.");
+            consola.mensaje("────────────────────────────────────────────────────────────");
+            partida.setCausaFinalizacion("QUINTA_REPETICION");
+            partida.setResultado("1/2-1/2");
+            blanco.registrarTablas();
+            negro.registrarTablas();
+            blanco.modificarElo(eloNegro, 0.5);
+            negro.modificarElo(eloBlanco, 0.5);
+            actualizarInstantanea(controlador, tablero, instantanea, blancas, negras);
+            controlador.actualizarPartida(partida);
+            controlador.actualizarEstadisticas(blanco);
+            controlador.actualizarEstadisticas(negro);
+            controlador.finalizarPartidaPartida(partida);
+            return true;
         }
         return false;
     }
@@ -602,7 +602,25 @@ public class AjedrezAlpha {
                     return true;
                 }
                 consola.mensaje("── [ TABLAS RECHAZADAS: %s ] ─────────────────", oponente.getNombreJugador());
-            return false;
+                return false;
+            case "RECLAMAR":
+                consola.mensaje(tablero.tablasCincuentaMovimientos() ? "── [ REGLA DE LOS 50 MOVIMIENTOS: TABLAS RECLAMADAS ] ─────────────" : "── [ TRIPLE REPETICIÓN: TABLAS RECLAMADAS ] ────────────────");
+                consola.mensaje(">> ¡Alto! %s Fin del juego.", tablero.tablasCincuentaMovimientos() ? "50 jugadas sin capturas ni avance de peón." : "Posición repetida 3 veces.");
+                consola.mensaje("───────────────────────────────────────────────────────────────────");
+                partida.setCausaFinalizacion(tablero.tablasCincuentaMovimientos() ? "50_MOVIMIENTOS" : "TRIPLE_REPETICION");
+                partida.setResultado("1/2-1/2");
+                proponente.registrarTablas();
+                oponente.registrarTablas();
+                int eloProponente = proponente.getElo();
+                int eloOponente = oponente.getElo();
+                proponente.modificarElo(eloOponente, 0.5);
+                oponente.modificarElo(eloProponente, 0.5);
+                
+                controlador.actualizarPartida(partida);
+                controlador.actualizarEstadisticas(proponente);
+                controlador.actualizarEstadisticas(oponente);
+                controlador.finalizarPartidaPartida(partida);
+                return true;
         }
         return false;
     }   

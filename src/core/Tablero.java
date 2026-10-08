@@ -629,39 +629,67 @@ public class Tablero {
         return true; // Se valida el ahogado, no hay movimientos legales y el rey no está en jaque
     }
 
-    public boolean tablasMaterialInsuficiente() {
+    public boolean tablasMaterialInsuficiente(String fen) {
+        fen = fen.substring(0, fen.indexOf(" "));
         int piezas = 0;
-        int rey = 0;
-        int alfil = 0;
-        int caballo = 0;
+        int blancas = 0;
+        int reyes = 0, alfiles = 0, caballos = 0;
+        int posicion = 0;
+        int alfilBlanco = 0, alfilNegro = 0;
 
-        for (int fila = 0; fila < 8; fila++) {
-            for (int columna = 0; columna < 8; columna++) {
-                Pieza pieza = tablero[fila][columna];
-                if (pieza != null) {
+        for (char c : fen.toCharArray()) {
+            if (c == '/') {
+                continue;
+            }
+            switch (c) {
+                case 'Q', 'q', 'R', 'r', 'P', 'p': 
+                    return false;
+                case 'K':
+                    blancas++;
+                case 'k':
+                    reyes++; 
                     piezas++;
-                    if (pieza instanceof Alfil) {
-                        alfil++;
+                    break;
+                case 'B':
+                    blancas++;
+                    if (c == 'B') {
+                        alfilBlanco = posicion;
                     }
-                    if (pieza instanceof Caballo) {
-                        caballo++;
+                case 'b':
+                    alfiles++; 
+                    piezas++;
+                    if (c == 'b') {
+                        alfilNegro = posicion;
                     }
-                    if (pieza instanceof Rey) {
-                        rey++;
-                    }
-                }
+                    break;
+                case 'N':
+                    blancas++;
+                case 'n':
+                    caballos++; 
+                    piezas++;
+                    break;
+            }
+            if (Character.isDigit(c)) {
+                posicion += Character.getNumericValue(c);
+            } else {
+                posicion++;
             }
         }
 
-        if (piezas == 3 || piezas == 2) {
-            if ((rey == 2) && (alfil == 0 && caballo == 0)) {
+        if (piezas <= 4) {
+            if (reyes == 2 && (alfiles == 0 && caballos == 0)) {
                 return true; // Rey contra rey
             }
-            if ((rey == 2) && (alfil ==1)) {
+            if (reyes == 2 && (alfiles == 1 && caballos == 0)) {
                 return true; // Rey contra rey + alfil
             }
-            if (rey == 2 && caballo == 1) {
+            if (reyes == 2 && (alfiles == 0 && caballos == 1)) {
                 return true; // Rey contra rey + caballo
+            }
+            if (reyes == 2 && (alfiles == 2 && blancas == 2)) {
+                if (((alfilBlanco / 8 + alfilBlanco % 8) % 2 == (alfilNegro / 8 + alfilNegro % 8) % 2)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -671,10 +699,20 @@ public class Tablero {
         return cincuentaMovimientos >= 100;
     }
 
+    public boolean tablasSetentaYCincoMovimientos() {
+        return cincuentaMovimientos >= 150;
+    }
+
     public boolean tablasTripleRepeticion(String fen) {
         String posicion = fen.substring(0, fen.lastIndexOf(" "));
         posicion = posicion.substring(0, posicion.lastIndexOf(" "));
         return registro.getOrDefault(posicion, 0) >= 3;
+    }
+
+    public boolean tablasQuintaRepeticion(String fen) {
+        String posicion = fen.substring(0, fen.lastIndexOf(" "));
+        posicion = posicion.substring(0, posicion.lastIndexOf(" "));
+        return registro.getOrDefault(posicion, 0) >= 5;
     }
 
     // DATOS DEL MOVIMIENTO
