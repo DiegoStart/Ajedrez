@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import consola.Consola;
 import modelo.Instantanea;
 import persistencia.Conexion;
 
@@ -23,11 +22,11 @@ public class InstantaneaDao {
         partidaDao = new PartidaDao();
     }
 
-    public void registrar(Instantanea instantanea) {
+    public boolean registrar(Instantanea instantanea) {
         sql = "INSERT INTO ajedrez.instantanea(id_partida, estado_actual, turno_actual, tiempo_blancas, tiempo_negras, ultimo_movimiento, contador_movimientos, cincuenta_movimientos) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -43,26 +42,29 @@ public class InstantaneaDao {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         instantanea.setIdInstantanea(rs.getInt(1));
+                        return true;
                     }
                 }
             }
+            return false;
         } catch (SQLException e) {
-            Consola.error("Error al registrar instantanea: " + e.getMessage());
+            return false;
         }
     }
 
-    public void eliminar(int idInstantanea) {
+    public boolean eliminar(int idInstantanea) {
         sql = "DELETE FROM ajedrez.instantanea WHERE id_instantanea = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idInstantanea); 
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al eliminar instantanea: " + e.getMessage());
+            return false;
         }
     }
 
@@ -89,16 +91,16 @@ public class InstantaneaDao {
                 instantaneas.add(instantanea);
             }
         } catch (SQLException e) {
-            Consola.error("Error al mostrar instantaneas guardadas: " + e.getMessage());
+            return instantaneas;
         }
         return instantaneas;
     }
 
-    public void actualizar(Instantanea instantanea) {
+    public boolean actualizar(Instantanea instantanea) {
         sql = "UPDATE ajedrez.instantanea SET estado_actual = ?, turno_actual = ?, tiempo_blancas = ?, tiempo_negras = ?, ultimo_movimiento = ?, contador_movimientos = ?, cincuenta_movimientos = ? WHERE id_instantanea = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -111,8 +113,9 @@ public class InstantaneaDao {
             pstmt.setInt(7, instantanea.getCincuentaMovimientos());
             pstmt.setInt(8, instantanea.getIdInstantanea());
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al actualizar instantanea: " + e.getMessage());
+            return false;
         }
     }
 
@@ -140,7 +143,7 @@ public class InstantaneaDao {
                 return instantanea;
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar instantanea: " + e.getMessage());
+            return null;
         }
         return null;
     }
@@ -169,16 +172,16 @@ public class InstantaneaDao {
                 return instantanea;
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar instantanea: " + e.getMessage());
+            return null;
         }
         return null;
     }
 
-    public void actualizarPorPartida(Instantanea instantanea) {
+    public boolean actualizarPorPartida(Instantanea instantanea) {
         sql = "UPDATE ajedrez.instantanea SET estado_actual = ?, turno_actual = ?, tiempo_blancas = ?, tiempo_negras = ?, ultimo_movimiento = ?, contador_movimientos = ?, cincuenta_movimientos = ? WHERE id_partida = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -191,23 +194,25 @@ public class InstantaneaDao {
             pstmt.setInt(7, instantanea.getCincuentaMovimientos());
             pstmt.setInt(8, instantanea.getPartida().getIdPartida());
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al actualizar instantanea: " + e.getMessage());
+            return false;
         }
     }
 
-    public void eliminarPorPartida(int idPartida) {
+    public boolean eliminarPorPartida(int idPartida) {
         sql = "DELETE FROM ajedrez.instantanea WHERE id_partida = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida); 
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al eliminar instantanea: " + e.getMessage());
+            return false;
         }
     }
 

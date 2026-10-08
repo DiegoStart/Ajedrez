@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import consola.Consola;
 import modelo.Movimiento;
 import persistencia.Conexion;
 
@@ -23,11 +22,11 @@ public class MovimientoDao {
         partidaDao = new PartidaDao();
     }
 
-    public void registrar(Movimiento movimiento) {
+    public boolean registrar(Movimiento movimiento) {
         sql = "INSERT INTO ajedrez.movimiento(id_partida, numero_movimiento, color, pieza, origen, destino, pieza_capturada, tipo_movimiento, jaque, jaque_mate, causa_tablas, notacion_algebraica, pieza_promocion, fen) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -46,23 +45,25 @@ public class MovimientoDao {
             pstmt.setString(13, movimiento.getPiezaPromocion());
             pstmt.setString(14, movimiento.getFen());
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al registrar movimiento: " + e.getMessage());
+            return false;
         }
     }
 
-    public void eliminar(int idMovimiento) {
+    public boolean eliminar(int idMovimiento) {
         sql = "DELETE FROM ajedrez.movimiento WHERE id_movimiento = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idMovimiento); 
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al eliminar movimiento: " + e.getMessage());
+            return false;
         }
     }
 
@@ -96,7 +97,7 @@ public class MovimientoDao {
                 movimientos.add(movimiento);
             }
         } catch (SQLException e) {
-            Consola.error("Error al mostrar movimientos guardados: " + e.getMessage());
+            return movimientos;
         }
         return movimientos;
     }
@@ -131,7 +132,7 @@ public class MovimientoDao {
                 return movimiento;
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar movimiento: " + e.getMessage());
+            return null;
         }
         return null;
     }
@@ -167,7 +168,7 @@ public class MovimientoDao {
                 movimientos.add(movimiento);
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar movimiento: " + e.getMessage());
+            return movimientos;
         }
         return movimientos;
     }
@@ -203,7 +204,7 @@ public class MovimientoDao {
                 return movimiento;
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar movimiento: " + e.getMessage());
+            return null;
         }
         return null;
     }
@@ -240,7 +241,7 @@ public class MovimientoDao {
                 return movimiento;
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar movimiento: " + e.getMessage());
+            return null;
         }
         return null;
     }
@@ -259,23 +260,24 @@ public class MovimientoDao {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            Consola.error("Error al contar movimientos: " + e.getMessage());
+            return 0;
         }
         return 0;
     }
 
-    public void eliminarPorPartida(int idPartida) {
+    public boolean eliminarPorPartida(int idPartida) {
         sql = "DELETE FROM ajedrez.movimiento WHERE id_partida = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida); 
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al eliminar movimientos: " + e.getMessage());
+            return false;
         }
     }
 

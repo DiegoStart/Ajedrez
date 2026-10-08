@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import consola.Consola;
 import modelo.Usuario;
 import persistencia.Conexion;
 
@@ -22,11 +21,11 @@ public class UsuarioDao {
         conexion = new Conexion();
     }
 
-    public void registrar(Usuario usuario) {
+    public boolean registrar(Usuario usuario) {
         sql = "INSERT INTO ajedrez.usuario(nombre_usuario, correo, contrasena, fecha_nacimiento, genero, foto_perfil, ultimo_acceso, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -46,26 +45,29 @@ public class UsuarioDao {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         usuario.setIdUsuario(rs.getInt(1));
+                        return true;
                     }
                 }
             }
+            return false;
         } catch (SQLException e) {
-            Consola.error("Error al registrar usuario: " + e.getMessage());
+            return false;
         }
     }
 
-    public void eliminar(int idUsuario) {
+    public boolean eliminar(int idUsuario) {
         sql = "DELETE FROM ajedrez.usuario WHERE id_usuario = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idUsuario); 
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al eliminar usuario: " + e.getMessage());
+            return false;
         }
     }
 
@@ -95,16 +97,16 @@ public class UsuarioDao {
                 usuarios.add(usuario);
             }
         } catch (SQLException e) {
-            Consola.error("Error al mostrar usuarios guardados: " + e.getMessage());
+            return usuarios;
         }
         return usuarios;
     }
 
-    public void actualizar(Usuario usuario) {
+    public boolean actualizar(Usuario usuario) {
         sql = "UPDATE ajedrez.usuario SET nombre_usuario = ?, correo = ?, contrasena = ?, fecha_nacimiento = ?, genero = ?, foto_perfil = ?, ultimo_acceso = ?, estado = ? WHERE id_usuario = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -122,8 +124,9 @@ public class UsuarioDao {
             pstmt.setString(8, usuario.getEstado());
             pstmt.setInt(9, usuario.getIdUsuario());
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al actualizar usuario: " + e.getMessage());
+           return false; 
         }
     }
 
@@ -154,7 +157,7 @@ public class UsuarioDao {
                 return usuario;
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar usuario: " + e.getMessage());
+            return null;
         }
         return null;
     }
@@ -186,7 +189,7 @@ public class UsuarioDao {
                 return usuario;
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar usuario por correo: " + e.getMessage());
+            return null;
         }
         return null;
     }
@@ -218,24 +221,25 @@ public class UsuarioDao {
                 return usuario;
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar usuario por nombre: " + e.getMessage());
+            return null;
         }
         return null;
     }
 
-    public void actualizarUltimoAcceso(int idUsuario) {
+    public boolean actualizarUltimoAcceso(int idUsuario) {
         sql = "UPDATE ajedrez.usuario SET ultimo_acceso = ? WHERE id_usuario = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
             pstmt.setInt(2, idUsuario);
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al actualizar ultimo acceso: " + e.getMessage());
+            return false;
         }
     }
 }

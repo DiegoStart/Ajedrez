@@ -22,52 +22,52 @@ public class Controlador {
         usuarioDao = new UsuarioDao();
     }
 
-    public void registrarInstantanea(Instantanea instantanea) {
-        instantaneaDao.registrar(instantanea);
+    public boolean registrarInstantanea(Instantanea instantanea) {
+        return instantaneaDao.registrar(instantanea);
     }
 
-    public void registrarJugador(Jugador jugador) {
-        jugadorDao.registrar(jugador);
+    public boolean registrarJugador(Jugador jugador) {
+        return jugadorDao.registrar(jugador);
     }
 
-    public void registrarMovimiento(Movimiento movimiento) {
-        movimientoDao.registrar(movimiento);
+    public boolean registrarMovimiento(Movimiento movimiento) {
+        return movimientoDao.registrar(movimiento);
     }
 
-    public void registrarParticipacion(Participacion participacion) {
-        participacionDao.registrar(participacion);
+    public boolean registrarParticipacion(Participacion participacion) {
+        return participacionDao.registrar(participacion);
     }
 
-    public void registrarPartida(Partida partida) {
-        partidaDao.registrar(partida);
+    public boolean registrarPartida(Partida partida) {
+        return partidaDao.registrar(partida);
     }
 
-    public void registrarUsuario(Usuario usuario) {
-        usuarioDao.registrar(usuario);
+    public boolean registrarUsuario(Usuario usuario) {
+        return usuarioDao.registrar(usuario);
     }
 
-    public void eliminarInstantanea(int idInstantanea) {
-        instantaneaDao.eliminar(idInstantanea);
+    public boolean eliminarInstantanea(int idInstantanea) {
+        return instantaneaDao.eliminar(idInstantanea);
     }
 
-    public void eliminarJugador(int idJugador) {
-        jugadorDao.eliminar(idJugador);
+    public boolean eliminarJugador(int idJugador) {
+        return jugadorDao.eliminar(idJugador);
     }
 
-    public void eliminarMovimiento(int idMovimiento) {
-        movimientoDao.eliminar(idMovimiento);
+    public boolean eliminarMovimiento(int idMovimiento) {
+        return movimientoDao.eliminar(idMovimiento);
     }
 
-    public void eliminarParticipacion(int idParticipacion) {
-        participacionDao.eliminar(idParticipacion);
+    public boolean eliminarParticipacion(int idParticipacion) {
+        return participacionDao.eliminar(idParticipacion);
     }
 
-    public void eliminarPartida(int idPartida) {
-        partidaDao.eliminar(idPartida);
+    public boolean eliminarPartida(int idPartida) {
+        return partidaDao.eliminar(idPartida);
     }
 
-    public void eliminarUsuario(int idUsuario) {
-        usuarioDao.eliminar(idUsuario);
+    public boolean eliminarUsuario(int idUsuario) {
+        return usuarioDao.eliminar(idUsuario);
     }
 
     public List<Instantanea> mostrarInstantaneas() {
@@ -94,24 +94,24 @@ public class Controlador {
         return usuarioDao.mostrar();
     }
 
-    public void actualizarInstantanea(Instantanea instantanea) {
-        instantaneaDao.actualizar(instantanea);
+    public boolean actualizarInstantanea(Instantanea instantanea) {
+        return instantaneaDao.actualizar(instantanea);
     }
 
-    public void actualizarJugador(Jugador jugador) {
-        jugadorDao.actualizar(jugador);
+    public boolean actualizarJugador(Jugador jugador) {
+        return jugadorDao.actualizar(jugador);
     }
 
-    public void actualizarParticipacion(Participacion participacion) {
-        participacionDao.actualizar(participacion);
+    public boolean actualizarParticipacion(Participacion participacion) {
+        return participacionDao.actualizar(participacion);
     }
 
-    public void actualizarPartida(Partida partida) {
-        partidaDao.actualizar(partida);
+    public boolean actualizarPartida(Partida partida) {
+        return partidaDao.actualizar(partida);
     }
 
-    public void actualizarUsuario(Usuario usuario) {
-        usuarioDao.actualizar(usuario);
+    public boolean actualizarUsuario(Usuario usuario) {
+        return usuarioDao.actualizar(usuario);
     }
 
     public Instantanea buscarInstantanea(int idInstantanea) {
@@ -142,24 +142,24 @@ public class Controlador {
         return instantaneaDao.buscarPorPartida(idPartida);
     }
 
-    public void actualizarPorPartidaInstantanea(Instantanea instantanea) {
-        instantaneaDao.actualizarPorPartida(instantanea);
+    public boolean actualizarPorPartidaInstantanea(Instantanea instantanea) {
+        return instantaneaDao.actualizarPorPartida(instantanea);
     }
 
-    public void eliminarPorPartidaInstantanea(int idPartida) {
-        instantaneaDao.eliminarPorPartida(idPartida);
+    public boolean eliminarPorPartidaInstantanea(int idPartida) {
+        return instantaneaDao.eliminarPorPartida(idPartida);
     }
     //Metodos unicos de JugadorDao
     public List<Jugador> buscarPorUsuarioJugador(int idUsuario) {
         return jugadorDao.buscarPorUsuario(idUsuario);
     }
 
-    public void actualizarElo(int idJugador, int elo) {
-        jugadorDao.actualizarElo(idJugador, elo);
+    public boolean actualizarElo(int idJugador, int elo) {
+        return jugadorDao.actualizarElo(idJugador, elo);
     }
 
-    public void actualizarEstadisticas(Jugador jugador) {
-        jugadorDao.actualizarEstadisticas(jugador);
+    public boolean actualizarEstadisticas(Jugador jugador) {
+        return jugadorDao.actualizarEstadisticas(jugador);
     }
     //Metodos unicos de MovimientoDao
     public List<Movimiento> buscarPorPartidaMovimiento(int idPartida) {
@@ -178,8 +178,8 @@ public class Controlador {
         return movimientoDao.contarMovimientos(idPartida);
     }
 
-    public void eliminarPorPartidaMovimiento(int idPartida) {
-        movimientoDao.eliminarPorPartida(idPartida);
+    public boolean eliminarPorPartidaMovimiento(int idPartida) {
+        return movimientoDao.eliminarPorPartida(idPartida);
     }
     //Metodos unicos de ParticipacionDao
     public List<Participacion> buscarPorPartidaParticipacion(int idPartida) {
@@ -198,12 +198,12 @@ public class Controlador {
         return participacionDao.contarParticipantes(idPartida);
     }
 
-    public void actualizarResultadoParticipacion(Participacion participacion) {
-        participacionDao.actualizarResultado(participacion);
+    public boolean actualizarResultadoParticipacion(Participacion participacion) {
+        return participacionDao.actualizarResultado(participacion);
     }
 
-    public void actualizarTiempoRestanteParticipacion(Participacion participacion) {
-        participacionDao.actualizarTiempoRestante(participacion);
+    public boolean actualizarTiempoRestanteParticipacion(Participacion participacion) {
+        return participacionDao.actualizarTiempoRestante(participacion);
     }
     //Metodos unicos de PartidaDao
     public List<Partida> buscarPorEstadoPartida(String estado) {
@@ -214,12 +214,12 @@ public class Controlador {
         return partidaDao.buscarPorJugador(idJugador);
     }
 
-    public void finalizarPartidaPartida(Partida partida) {
-        partidaDao.finalizarPartida(partida);
+    public boolean finalizarPartidaPartida(Partida partida) {
+        return partidaDao.finalizarPartida(partida);
     }
 
-    public void actualizarEstadoPartida(int idPartida, String estado) {
-        partidaDao.actualizarEstado(idPartida, estado);
+    public boolean actualizarEstadoPartida(int idPartida, String estado) {
+        return partidaDao.actualizarEstado(idPartida, estado);
     }
 
     public List<Partida> buscarPartidasEnCurso() {
@@ -235,15 +235,15 @@ public class Controlador {
     }
     //Metodos unicos de UsuarioDao
     public Usuario buscarPorCorreoUsuario(String correo) {
-        return usuarioDao.buscarPorNombreUsuario(correo);
+        return usuarioDao.buscarPorCorreo(correo);
     }
 
     public Usuario buscarPorNombreUsuarioUsuario(String nombreUsuario) {
-        return usuarioDao.buscarPorCorreo(nombreUsuario);
+        return usuarioDao.buscarPorNombreUsuario(nombreUsuario);
     }
 
-    public void actualizarUltimoAccesoUsuario(int idUsuario) {
-        usuarioDao.actualizarUltimoAcceso(idUsuario);
+    public boolean actualizarUltimoAccesoUsuario(int idUsuario) {
+        return usuarioDao.actualizarUltimoAcceso(idUsuario);
     }
     //Eliminar Todo
     public void eliminarTodo() {

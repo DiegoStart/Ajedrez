@@ -9,7 +9,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-import consola.Consola;
 import modelo.Partida;
 import persistencia.Conexion;
 
@@ -21,11 +20,11 @@ public class PartidaDao {
         conexion = new Conexion();
     }
 
-    public void registrar(Partida partida) {
+    public boolean registrar(Partida partida) {
         sql = "INSERT INTO ajedrez.partida(estado, resultado, causa_finalizacion, tipo_partida, tiempo_control, duracion) VALUES (?, ?, ?, ?, ?, ?)";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -39,26 +38,29 @@ public class PartidaDao {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         partida.setIdPartida(rs.getInt(1));
+                        return true;
                     }
                 }
             }
         } catch (SQLException e) {
-            Consola.error("Error al registrar partida: " + e.getMessage());
+            return false;
         }
+        return false;
     }
 
-    public void eliminar(int idPartida) {
+    public boolean eliminar(int idPartida) {
         sql = "DELETE FROM ajedrez.partida WHERE id_partida = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida); 
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al eliminar partida: " + e.getMessage());
+            return false;
         }
     }
 
@@ -87,16 +89,16 @@ public class PartidaDao {
                 partidas.add(partida);
             }
         } catch (SQLException e) {
-            Consola.error("Error al mostrar partidas guardadas: " + e.getMessage());
+            return partidas;
         }
         return partidas;
     }
 
-    public void actualizar(Partida partida) {
+    public boolean actualizar(Partida partida) {
         sql = "UPDATE ajedrez.partida SET estado = ?, resultado = ?, causa_finalizacion = ?, fecha_fin = ? WHERE id_partida = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -110,8 +112,9 @@ public class PartidaDao {
             }
             pstmt.setInt(5, partida.getIdPartida());
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al actualizar partida: " + e.getMessage());
+            return false;
         }
     }
 
@@ -141,7 +144,7 @@ public class PartidaDao {
                 return partida;
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar partida: " + e.getMessage());
+            return null;
         }
         return null;
     }
@@ -173,7 +176,7 @@ public class PartidaDao {
                 partidas.add(partida);
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar partida: " + e.getMessage());
+            return partidas;
         }
         return partidas;
     }
@@ -205,16 +208,16 @@ public class PartidaDao {
                 partidas.add(partida);
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar partida: " + e.getMessage());
+            return partidas;
         }
         return partidas;
     }
 
-    public void finalizarPartida(Partida partida) {
+    public boolean finalizarPartida(Partida partida) {
         sql = "UPDATE ajedrez.partida SET estado = 'FINALIZADA', resultado = ?, causa_finalizacion = ?, duracion = ?, fecha_fin = CURRENT_TIMESTAMP WHERE id_partida = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -223,38 +226,41 @@ public class PartidaDao {
             pstmt.setInt(3, partida.getDuracion());
             pstmt.setInt(4, partida.getIdPartida());
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al actualizar partida: " + e.getMessage());
+            return false;
         }
     }
 
-    public void actualizarEstado(int idPartida, String estado) {
+    public boolean actualizarEstado(int idPartida, String estado) {
         sql = "UPDATE ajedrez.partida SET estado = ? WHERE id_partida = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, estado);
             pstmt.setInt(2, idPartida);
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al actualizar partida: " + e.getMessage());
+            return false;
         }
     }
 
-    public void eliminarTodo() {
+    public boolean eliminarTodo() {
         String sql = "TRUNCATE TABLE ajedrez.movimiento, ajedrez.instantanea, ajedrez.participacion, ajedrez.partida, ajedrez.jugador, ajedrez.usuario RESTART IDENTITY CASCADE";        
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al vaciar las tablas: " + e.getMessage());
+            return false;
         }
     }
 }

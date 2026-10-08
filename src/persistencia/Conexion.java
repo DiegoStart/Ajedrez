@@ -7,8 +7,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import consola.Consola;
-
 public class Conexion {
     private String url;
     private String user;
@@ -22,9 +20,8 @@ public class Conexion {
             url = propiedades.getProperty("db.url");
             user = propiedades.getProperty("db.user");
             password = propiedades.getProperty("db.password");
-
         } catch (IOException e) {
-            Consola.error("No se pudo leer config.properties");
+            //Consola.error("No se pudo leer config.properties");
         }
     }
 
@@ -32,7 +29,7 @@ public class Conexion {
         try {
             return DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
-            Consola.error("Error en la conexión: " + e.getMessage());
+            //Consola.error("Error en la conexión: " + e.getMessage());
             return null;
         }
     }

@@ -23,10 +23,7 @@ public class Excepciones {
                 if (numero >= limInf && numero <= limSup) {
                     return numero;
                 }
-
-                Consola.error("Error: Ingresa una opción válida.");
             } catch (NumberFormatException e) {
-                Consola.error("Error: Ingresa un número entero válido.");
             }
         }
     }
@@ -39,12 +36,10 @@ public class Excepciones {
         while (true) {
             String nombre = leerString(mensaje).trim();
             if (!nombre.matches("[a-zA-ZñÑáéíóúÁÉÍÓÚ\\s]+") || nombre.replaceAll("\\s+", "").length() < 3) {
-                Consola.error("Error: Solo se permiten letras y debe tener al menos 3 caracteres.");
                 continue;
             }
 
             if (contienePalabraProhibida(nombre)) {
-                Consola.error("Nombre no permitido. Se ha detectado lenguaje ofensivo.");
                 continue;
             }
             return nombre;
@@ -71,7 +66,6 @@ public class Excepciones {
             if (partes.length == 2 && casillaValida(partes[0]) && casillaValida(partes[1])) {
                 return partes;
             }
-            Consola.error("Error: Ingresa un movimiento válido (ej: E2 E4) " + "o un comando permitido.");
         }
     }
 

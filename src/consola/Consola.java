@@ -7,10 +7,60 @@ import core.piezas.*;
 import modelo.*;
 
 public class Consola {
+    public String RESET;
+    //Estilos
+    public String NEGRITA;
+    // Paleta (Retro Vector Arcade)
+    public String rojo;     // Carmesí / Rojo neón
+    public String amarillo;  // Amarillo brillante
+    public String azul;
+    public String blanco; // Blanco puro
+    // Colores de piezas
+    public String blancas;
+    public String negras;
     private Tablero tablero;
 
     public Consola() {
-        
+        RESET = "\u001B[0m";
+        NEGRITA = "\u001B[1m";
+        rojo = "\u001B[38;2;255;30;86m";
+        amarillo = "\u001B[38;2;255;221;0m";
+        blanco = "\u001B[38;2;255;255;255m";
+        azul = "\u001B[38;2;0;140;255m";
+        blancas = blanco + NEGRITA;
+        negras = rojo + NEGRITA;
+    }
+
+    public String getReset() {
+        return RESET;
+    }
+
+    public String getNegrita() {
+        return NEGRITA;
+    }
+
+    public String getRojo() {
+        return rojo;
+    }
+
+    public String getAmarillo() {
+        return amarillo;
+    }
+
+    public String getBlanco() {
+        return blanco;
+    }
+
+    public String getAzul() {
+        return azul;
+    }
+
+    public String getBlancas() {
+        return blancas;
+    }
+
+    public String getNegras() {
+        return negras;
     }
 
     public void setTablero(Tablero tablero) {
@@ -34,13 +84,75 @@ public class Consola {
         return "" + (char) ('A' + columna) + (8 - fila);
     }
 
-    public static void error(String texto) {
-        System.err.println(texto);
+    public void error(String texto) {
+        System.err.println(azul + texto + RESET);
+    }
+
+    //Notificaciones
+    public void fin(String caso, String ganador, String perdedor) {
+        switch (caso) {
+            case "JAQUE_MATE":
+                mensaje(rojo + "── [ ¡JAQUE MATE! ] ────────────────────────────────────────" + RESET);
+                mensaje(rojo + ">> " + blanco + "%s ha perdido" + rojo + " | " + amarillo + "GANADOR: %s" + RESET, perdedor, ganador);
+                mensaje(rojo + "────────────────────────────────────────────────────────────" + RESET);
+                break;
+            case "TIEMPO_AGOTADO":
+                mensaje(rojo + "── [ TIEMPO AGOTADO ] ──────────────────────────────────────" + RESET);
+                mensaje(rojo + ">> " + blanco + "%s pierde por tiempo" + rojo + " | " + amarillo + "GANADOR: %s" + RESET, perdedor, ganador);
+                mensaje(rojo + "────────────────────────────────────────────────────────────" + RESET);
+                break; 
+            case "RENDICION":
+                mensaje(rojo + "── [ RENDICIÓN: FIN DEL JUEGO ] ────────────────────────────" + RESET);
+                mensaje(rojo + ">> " + blanco + "%s se ha rendido" + rojo + " | " + amarillo + "GANADOR: %s" + RESET, perdedor, ganador);
+                mensaje(rojo + "────────────────────────────────────────────────────────────" + RESET);
+                break; 
+            case "ACUERDO_MUTUO":
+                mensaje(amarillo + "── [ TABLAS POR ACUERDO MUTUO ] ────────────────────────────" + RESET);
+                mensaje(amarillo + ">> " + blanco + "¡Alto! Fin del juego. %s y %s acordaron tablas." + RESET, ganador, perdedor);
+                mensaje(amarillo + "────────────────────────────────────────────────────────────" + RESET);
+                break;
+            case "50_MOVIMIENTOS":
+                mensaje(amarillo + "── [ REGLA DE LOS 50 MOVIMIENTOS: TABLAS RECLAMADAS ] ─────────────" + RESET);
+                mensaje(amarillo + ">> " + blanco + "¡Alto! 50 jugadas sin capturas ni avance de peón. Fin del juego." + RESET);
+                mensaje(amarillo + "───────────────────────────────────────────────────────────────────" + RESET);
+                break;
+            case "TRIPLE_REPETICION":
+                mensaje(amarillo + "── [ TRIPLE REPETICIÓN: TABLAS RECLAMADAS ] ────────────────" + RESET);
+                mensaje(amarillo + ">> " + blanco + "¡Alto! Posición repetida 3 veces. Fin del juego." + RESET);
+                mensaje(amarillo + "────────────────────────────────────────────────────────────" + RESET);
+                break;
+            case "AHOGADO":
+                mensaje(amarillo + "── [ AHOGADO: TABLAS ] ─────────────────────────────────────" + RESET);
+                mensaje(amarillo + ">> " + blanco + "¡Alto! Sin movimientos válidos. Fin del juego." + RESET);
+                mensaje(amarillo + "────────────────────────────────────────────────────────────" + RESET);
+                break;
+            case "MATERIAL_INSUFICIENTE":
+                mensaje(amarillo + "── [ MATERIAL INSUFICIENTE: TABLAS ] ───────────────────────" + RESET);
+                mensaje(amarillo + ">> " + blanco + "¡Alto! No hay piezas suficientes. Fin del juego." + RESET);
+                mensaje(amarillo + "────────────────────────────────────────────────────────────" + RESET);
+                break;
+            case "75_MOVIMIENTOS":
+                mensaje(amarillo + "── [ REGLA DE LOS 75 MOVIMIENTOS: TABLAS RECLAMADAS ] ─────────────" + RESET);
+                mensaje(amarillo + ">> " + blanco + "¡Alto! 75 jugadas sin capturas ni avance de peón. Fin del juego." + RESET);
+                mensaje(amarillo + "───────────────────────────────────────────────────────────────────" + RESET);
+                break;
+            case "QUINTA_REPETICION":
+                mensaje(amarillo + "── [ QUINTA REPETICIÓN: TABLAS RECLAMADAS ] ────────────────" + RESET);
+                mensaje(amarillo + ">> " + blanco + "¡Alto! Posición repetida 5 veces. Fin del juego." + RESET);
+                mensaje(amarillo + "────────────────────────────────────────────────────────────" + RESET);
+                break;
+        }
+    }
+
+    public void guardado(int idPartida) {
+        mensaje(rojo + "┌─ " + amarillo + "GUARDADO EXITOSO " + rojo + "───────────────────────────────────────┐" + RESET);
+        mensaje(rojo + "│  " + blanco + ">> Partida #%d guardada correctamente.                   " + rojo + "│", idPartida);
+        mensaje(rojo + "└──────────────────────────────────────────────────────────┘" + RESET);
     }
 
     // Menús
     public void titulo() {
-        mensaje("""
+        mensaje((rojo + NEGRITA) + """
 
          █████╗      ██╗███████╗██████╗ ██████╗ ███████╗███████╗       █████╗  ██╗     ██████╗ ██╗  ██╗  █████╗ 
         ██╔══██╗     ██║██╔════╝██╔══██╗██╔══██╗██╔════╝╚══███╔╝      ██╔══██╗ ██║     ██╔══██╗██║  ██║ ██╔══██╗
@@ -48,84 +160,90 @@ public class Consola {
         ██╔══██║██╗  ██║██╔══╝  ██║  ██║██╔══██╗██╔══╝   ███╔╝        ██╔══██║ ██║     ██╔═══╝ ██╔══██║ ██╔══██║
         ██║  ██║╚█████╔╝███████╗██████╔╝██║  ██║███████╗███████╗      ██║  ██║ ███████╗██║     ██║  ██║ ██║  ██║
         ╚═╝  ╚═╝ ╚════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝      ╚═╝  ╚═╝ ╚══════╝╚═╝     ╚═╝  ╚═╝ ╚═╝  ╚═╝
-        """);
+        """ + RESET);
     }
     
     public void menuPrincipal() {
         titulo();
-        mensaje("""
-            ┌─ MENÚ PRINCIPAL ───────────────────────── ESTADO: OFFLINE ─┐                                                 
-            │  [ 1 ]  NUEVA PARTIDA                                      │
-            │  [ 2 ]  CARGAR PARTIDA                                     │
-            │  [ 3 ]  HISTORIAL DE PARTIDAS                              │
-            │  [ 4 ]  RECREAR PARTIDA                                    │
-            │  [ 5 ]  EXPORTAR PGN                                       │
-            │  [ 6 ]  ESTADÍSTICAS                                       │
-            │                                                            │
-            │  [ 0 ]  SALIR DEL JUEGO                                    │
-            └────────────────────────────────────────────────────────────┘""");
+        mensaje(rojo + "┌─" + amarillo + " MENÚ PRINCIPAL" + rojo + " ─────────────────────────" + blanco + " ESTADO:" + amarillo + " OFFLINE" + rojo + " ─┐");                                                
+        mensaje(rojo + "│  " + blanco + "[ 1 ]  NUEVA PARTIDA                                      " + rojo + "│");
+        mensaje(rojo + "│  " + blanco + "[ 2 ]  CARGAR PARTIDA                                     " + rojo + "│");
+        mensaje(rojo + "│  " + blanco + "[ 3 ]  HISTORIAL DE PARTIDAS                              " + rojo + "│");
+        mensaje(rojo + "│  " + blanco + "[ 4 ]  RECREAR PARTIDA                                    " + rojo + "│");
+        mensaje(rojo + "│  " + blanco + "[ 5 ]  EXPORTAR PGN                                       " + rojo + "│");
+        mensaje(rojo + "│  " + blanco + "[ 6 ]  ESTADÍSTICAS                                       " + rojo + "│");
+        mensaje(rojo + "│                                                            │");
+        mensaje(rojo + "│  " + blanco + "[ 0 ]  SALIR DEL JUEGO                                    " + rojo + "│");
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
     }
 
     public void menuJugador() {
-        mensaje("""
-            ┌─ MENÚ DE PAUSA ──────────┐
-            │  [ 1 ]  Guardar y salir  │
-            │  [ 2 ]  Reiniciar        │
-            │  [ 3 ]  Regresar         │
-            └──────────────────────────┘""");
+        mensaje(rojo + "┌─ " + amarillo + "MENÚ DE PAUSA" + rojo + " ──────────┐");
+        mensaje(rojo + "│ " + blanco + " [ 1 ]  Guardar y salir  " + rojo + "│");
+        mensaje(rojo + "│ " + blanco + " [ 2 ]  Reiniciar        " + rojo + "│");
+        mensaje(rojo + "│ " + blanco + " [ 3 ]  Regresar         " + rojo + "│");
+        mensaje(rojo + "└──────────────────────────┘" + RESET);
     }
 
     public void menuContrincantes(Jugador blanca, Jugador negra) {
-        mensaje("""
-            ┌─ JUGADORES ─────────────────────────────────────────────┐
-            │  Blancas (B) > %-40s │
-            │  Negras  (N) > %-40s │
-            └─────────────────────────────────────────────────────────┘
-            ¿Están listos para jugar? """, blanca.getNombreJugador(), negra.getNombreJugador());
+        mensaje(rojo + "┌─ " + amarillo + "JUGADORES" + rojo + " ─────────────────────────────────────────────┐");
+        mensaje(rojo + "│ " + blancas + " Blancas (B) > %-40s" + rojo + " │", blanca.getNombreJugador());
+        mensaje(rojo + "│ " + negras + " Negras  (N) > %-40s" + rojo + " │" + RESET, negra.getNombreJugador());
+        mensaje(rojo + "└─────────────────────────────────────────────────────────┘" + RESET);
+        mensaje(amarillo + ">> ¿Están listos para jugar? " + RESET);
     }
 
     public void menuPromocion() {
-        mensaje("""
-            ┌─ PROMOCIÓN DE PEÓN ────────┐
-            │  [ 1 ]  Reina   (Q)        │
-            │  [ 2 ]  Torre   (T)        │
-            │  [ 3 ]  Alfil   (A)        │
-            │  [ 4 ]  Caballo (C)        │
-            └────────────────────────────┘"""
-        );
+        mensaje(rojo + "┌─ " + amarillo + "PROMOCIÓN DE PEÓN" + rojo + " ────────┐");
+        mensaje(rojo + "│ " + blanco + " [ 1 ]  Reina   (Q)        " + rojo + "│");
+        mensaje(rojo + "│ " + blanco + " [ 2 ]  Torre   (T)        " + rojo + "│");
+        mensaje(rojo + "│ " + blanco + " [ 3 ]  Alfil   (A)        " + rojo + "│");
+        mensaje(rojo + "│ " + blanco + " [ 4 ]  Caballo (C)        " + rojo + "│");
+        mensaje(rojo + "└────────────────────────────┘" + RESET);
+    }
+
+    public void menuSalida() {
+        mensaje(rojo + "┌─ " + amarillo + "APAGANDO CONSOLA " + rojo + "─────────────────────────────────────────┐" + RESET);
+        mensaje(rojo + "│  " + amarillo + ">> Desconectando...                                       " + rojo + "│" + RESET);
+        mensaje(rojo + "│  " + amarillo + ">> ¡Gracias por jugar!                                    " + rojo + "│" + RESET);
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
     }
 
     // Tablero
     public void tablero(String nombreBlanco, String nombreNegro, boolean esTurnoBlanco, String estado, int tiempo) {
-        String turnoActual = esTurnoBlanco ? "BLANCAS" : "NEGRAS";
-        mensaje("┌─ PARTIDA: %-10s ────────────────── TURNO: %-7s ─┐", estado, turnoActual);
-        mensaje("│ Blancas: %-18s  Negras: %-18s │", nombreBlanco, nombreNegro);
-        mensaje("└─────────────────────────────────────────────────────────┘");
-        mensaje("     A   B   C   D   E   F   G   H");
-        mensaje("   ┌───┬───┬───┬───┬───┬───┬───┬───┐");
+        String turnoActual = esTurnoBlanco ? blancas + "BLANCAS" : negras + "NEGRAS ";
+        mensaje(rojo + "┌─ PARTIDA: " + amarillo + "%-10s " + rojo + "────────────────── TURNO: %-7s" + rojo + " ─┐" + RESET, estado, turnoActual);
+        mensaje(rojo + "│ " + blanco + "Blancas: " + blancas + "%-18s  " + rojo + "Negras: " + negras + "%-18s " + rojo + "│" + RESET, nombreBlanco, nombreNegro);
+        mensaje(rojo + "└─────────────────────────────────────────────────────────┘" + RESET);
+        mensaje(rojo + "     A   B   C   D   E   F   G   H" + RESET);
+        mensaje(amarillo + "   ┌───┬───┬───┬───┬───┬───┬───┬───┐" + RESET);
 
         for (int fila = 0; fila < 8; fila++) {
             StringBuilder linea = new StringBuilder();
-            linea.append(String.format(" %d │", 8 - fila));
+            linea.append(amarillo).append(String.format(" %d │", 8 - fila)).append(RESET);
             for (int columna = 0; columna < 8; columna++) {
                 Pieza pieza = tablero.getPieza(fila, columna);
                 String contenido;
                 if (pieza == null) {
                     contenido = " ";
                 } else {
-                    contenido = obtenerSimbolo(pieza);
+                    if (pieza.getEsBlanca()) {
+                        contenido = blancas + obtenerSimbolo(pieza) + RESET;
+                    } else {
+                        contenido = negras + obtenerSimbolo(pieza) + RESET;
+                    }
                 }
-                linea.append(" ").append(contenido).append(" │");
+                linea.append(" ").append(contenido).append(amarillo).append(" │").append(RESET);
             }
-            linea.append(String.format(" %d", 8 - fila));
+            linea.append(amarillo).append(String.format(" %d", 8 - fila)).append(RESET);
             mensaje(linea.toString());
             if (fila < 7) {
-                mensaje("   ├───┼───┼───┼───┼───┼───┼───┼───┤");
+                mensaje(amarillo + "   ├───┼───┼───┼───┼───┼───┼───┼───┤" + RESET);
             } else {
-                mensaje("   └───┴───┴───┴───┴───┴───┴───┴───┘");
+                mensaje(amarillo + "   └───┴───┴───┴───┴───┴───┴───┴───┘" + RESET);
             }
         }
-        mensaje("     A   B   C   D   E   F   G   H");
+        mensaje(rojo + "     A   B   C   D   E   F   G   H" + RESET);
         ultimoMovimientoTiempo(tiempo);
     }
 
@@ -133,16 +251,16 @@ public class Consola {
         int minutos = tiempo / 60;
         int segundos = tiempo % 60;
         if (tablero.getUltimoMovimiento() == null) {
-            mensaje("┌─ ÚLTIMO MOVIMIENTO ────┐┌─ TIEMPO ─────────────┐");
-            mensaje("│ Ninguno                ││ Quedan: %02d:%02d min    │", minutos, segundos);
-            mensaje("└────────────────────────┘└──────────────────────┘");
+            mensaje(rojo + "┌─ ÚLTIMO MOVIMIENTO ────┐┌─ TIEMPO ─────────────┐" + RESET);
+            mensaje(rojo + "│ " + blanco + "Ninguno                " + rojo + "││ " + amarillo + "Quedan: %02d:%02d min    " + rojo + "│" + RESET, minutos, segundos);
+            mensaje(rojo + "└────────────────────────┘└──────────────────────┘" + RESET);
             return;
         }
 
         int[] ultimo = tablero.getUltimoMovimiento();
-        mensaje("┌─ ÚLTIMO MOVIMIENTO ────┐┌ TIEMPO ──────────────┐");
-        mensaje("│ %s -> %-15s  ││ Quedan: %02d:%02d min    │", casilla(ultimo[0], ultimo[1]), casilla(ultimo[2], ultimo[3]), minutos, segundos);
-        mensaje("└────────────────────────┘└──────────────────────┘");
+        mensaje(rojo + "┌─ ÚLTIMO MOVIMIENTO ────┐┌ TIEMPO ──────────────┐" + RESET);
+        mensaje(rojo + "│ " + amarillo + "%s -> %-15s  " + rojo + "││ " + amarillo + "Quedan: %02d:%02d min    " + rojo + "│" + RESET, casilla(ultimo[0], ultimo[1]), casilla(ultimo[2], ultimo[3]), minutos, segundos);
+        mensaje(rojo + "└────────────────────────┘└──────────────────────┘" + RESET);
     }
 
     public void alertaJaque(String nombreJugador, int[][] coordenadas) {
@@ -163,10 +281,10 @@ public class Consola {
         String aviso = String.format("¡Cuidado %s! Tu Rey está en jaque.", nombreJugador);
         String salidas = (contador == 0) ? "NO TIENES ESCAPATORIA" : casillas.toString().trim();    
         String estado = String.format("Rey en [%s] | Salidas (%02d): %s", posicionRey, contador, salidas);
-        mensaje("┌─ ¡ALERTA DE JAQUE! ──────────────────────────────────────┐");
-        mensaje("│  %-55s │", aviso);
-        mensaje("│  %-55s │", estado);
-        mensaje("└──────────────────────────────────────────────────────────┘");
+        mensaje((rojo + NEGRITA) + "┌─ ¡ALERTA DE JAQUE! ──────────────────────────────────────┐");
+        mensaje("│  " + blanco + "%-55s " + rojo + "│", aviso);
+        mensaje("│  " + blanco + "%-55s " + rojo + "│", estado);
+        mensaje("└──────────────────────────────────────────────────────────┘" + RESET);
     }
 
     private String obtenerSimbolo(Pieza pieza) {
@@ -192,10 +310,9 @@ public class Consola {
     
     // Jugador
     public void sinJugadoresGuardados() {
-        mensaje("""
-        ┌─ REGISTRO DE JUGADORES ───────────────────────────────────────────────────────┐
-        │                       -- No hay jugadores guardados --                        │
-        └───────────────────────────────────────────────────────────────────────────────┘""");
+        mensaje(rojo + "┌─ " + amarillo + "REGISTRO DE JUGADORES " + rojo + "───────────────────────────────────────────────────────┐");
+        mensaje("│                       " + blanco + "-- No hay jugadores guardados --                        " + rojo + "│");
+        mensaje("└───────────────────────────────────────────────────────────────────────────────┘" + RESET);
     }
 
     public void mostrarJugadoresUsuario(List<Jugador> jugadores) {
@@ -262,7 +379,7 @@ public class Consola {
             }
         }
 
-        mensaje("┌─ Rendimiento Global ────────────────────┬─ Distribución por ELO ─────────────────┐");
+        mensaje(rojo + "┌─ " + amarillo + "RENDIMIENTO GLOBAL " + rojo + "────────────────────┬─ " + blanco + "DISTRIBUCIÓN POR ELO " + rojo + "─────────────────┐" + RESET);
         String[] niveles = {"100%", " 75%", " 50%", " 25%"};
         for (int fila = 0; fila < 4; fila++) {
             StringBuilder izquierda = new StringBuilder();
@@ -278,12 +395,12 @@ public class Consola {
                 derecha.append("  ").append(simbolo).append("   "); 
             }
             derecha.append("  ");
-            mensaje("│ %-39s │ %-38s │", izquierda, derecha);
+            mensaje(rojo + "│" + blanco + " %-39s " + rojo + "│" + amarillo + " %-38s " + rojo + "│", izquierda, derecha);
         }
-        mensaje("│       VIC  DER  TAB  REN  ABA           │    <1000  1000  1200  1400  1600+      │");
-        mensaje("├─────────────────────────────────────────┴────────────────────────────────────────┤");
-        mensaje("│ # REGISTRO DE JUGADORES                                                          │");
-        mensaje("├──────────────────────────────────────────────────────────────────────────────────┤");
+        mensaje(rojo + "│       " + amarillo + "VIC  DER  TAB  REN  ABA" + rojo + "           │    " + blanco + "<1000  1000  1200  1400  1600+" + rojo + "      │" + RESET);
+        mensaje(rojo + "├─────────────────────────────────────────┴────────────────────────────────────────┤" + RESET);
+        mensaje(rojo + "│ " + blanco + "# REGISTRO DE JUGADORES                                                          " + rojo + "│");
+        mensaje(rojo + "├──────────────────────────────────────────────────────────────────────────────────┤" + RESET);
 
         for (int x = 0; x < jugadores.size(); x++) {
             Jugador jugador = jugadores.get(x);
@@ -296,19 +413,17 @@ public class Consola {
                 nombre = nombre.substring(0, 6) + "..";
             }
             int progreso = (int) Math.round(porcentaje);
-            String informacion = String.format(" > %-8s ─ %4d ELO ─ [%s] %3d%% ─ (%3dV · %3dD · %3dT · %3dR · %3dA)",
-                nombre, jugador.getElo(), barra, progreso, jugador.getVictorias(), jugador.getDerrotas(), jugador.getTablas(), jugador.getRendiciones(), jugador.getAbandonos());
-            mensaje("│ %-80s │", informacion);
+            String informacion = String.format(" > %-8s ─ %4d ELO ─ [%s] %3d%% ─ (%3dV · %3dD · %3dT · %3dR · %3dA)", nombre, jugador.getElo(), barra, progreso, jugador.getVictorias(), jugador.getDerrotas(), jugador.getTablas(), jugador.getRendiciones(), jugador.getAbandonos());
+            mensaje(rojo + "│ " + amarillo + "%-80s " + rojo + "│", informacion);
         }
-        mensaje("└──────────────────────────────────────────────────────────────────────────────────┘");
+        mensaje(rojo + "└──────────────────────────────────────────────────────────────────────────────────┘" + RESET);
     }
 
     // Movimiento
     public void sinMovimientosGuardados() {
-        mensaje("""
-        ┌─ HISTORIAL DE MOVIMIENTOS ────────────────────────────────────────────────────┐
-        │                     -- No hay movimientos realizados --                       │
-        └───────────────────────────────────────────────────────────────────────────────┘""");
+        mensaje(rojo + "┌─ " + amarillo + "HISTORIAL DE MOVIMIENTOS " + rojo + "────────────────────────────────────────────────────┐" + RESET);
+        mensaje(rojo + "│                     " + blanco + "-- No hay movimientos realizados --                       " + rojo + "│");
+        mensaje(rojo + "└───────────────────────────────────────────────────────────────────────────────┘" + RESET);
     }
 
     public void movimientosRealizados(List<Movimiento> movimientos) {
@@ -317,10 +432,11 @@ public class Consola {
             return;
         }
 
-        mensaje("┌─ HISTORIAL DE MOVIMIENTOS ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐");
-        mensaje("│ N°  │ COLOR   │ PIEZA     │ JUGADA   │ NOTACIÓN │ CAPTURA   │ TIPO             │ ESTADO                                                                 │");
-        mensaje("├─────┼─────────┼───────────┼──────────┼──────────┼───────────┼──────────────────┼────────────────────────────────────────────────────────────────────────┤");
+        mensaje(rojo + "┌─ " + amarillo + "HISTORIAL DE MOVIMIENTOS " + rojo + "──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐" + RESET);
+        mensaje(rojo + "│ " + amarillo + "N°  " + rojo + "│ " + amarillo + "COLOR   " + rojo + "│ " + amarillo + "PIEZA     " + rojo + "│ " + amarillo + "JUGADA   " + rojo + "│ " + amarillo + "NOTACIÓN " + rojo + "│ " + amarillo + "CAPTURA   " + rojo + "│ " + amarillo + "TIPO             " + rojo + "│ " + amarillo + "ESTADO                                                                 " + rojo + "│" + RESET);
+        mensaje(rojo + "├─────┼─────────┼───────────┼──────────┼──────────┼───────────┼──────────────────┼────────────────────────────────────────────────────────────────────────┤" + RESET);
         for (Movimiento movimiento : movimientos) {
+            String tinte = movimiento.getColor() ? blancas : negras;
             int numeroMovimiento = movimiento.getColor() ? movimiento.getNumeroMovimiento() : movimiento.getNumeroMovimiento() - 1;
             String color = movimiento.getColor() ? "Blancas" : "Negras";
             String origenDestino = (movimiento.getOrigen() != null && movimiento.getDestino() != null) ? casilla(movimiento.getOrigen()[0], movimiento.getOrigen()[1]) + " -> " + casilla(movimiento.getDestino()[0], movimiento.getDestino()[1]) : "N/A";   
@@ -329,9 +445,9 @@ public class Consola {
             String captura = (movimiento.getPiezaCapturada() != null) ? movimiento.getPiezaCapturada() : "-";
             String tipo = (movimiento.getTipoMovimiento() != null) ? movimiento.getTipoMovimiento() : "Normal";
             String estado = movimiento.getFen();  
-            mensaje("│ %-3d │ %-7s │ %-9s │ %-8s │ %-8s │ %-9s │ %-16s │ %-70s │", numeroMovimiento, color, pieza, origenDestino, notacion, captura, tipo, estado);
+            mensaje(rojo + "│" + tinte + " %-3d " + rojo + "│" + tinte + " %-7s " + rojo + "│" + tinte + " %-9s " + rojo + "│" + tinte + " %-8s " + rojo + "│" + tinte + " %-8s " + rojo + "│" + tinte + " %-9s " + rojo + "│" + tinte + " %-16s " + rojo + "│" + tinte + " %-70s " + rojo + "│" + RESET, numeroMovimiento, color, pieza, origenDestino, notacion, captura, tipo, estado);
         }
-        mensaje("└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘");
+        mensaje(rojo + "└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘" + RESET);
     }
     
     public void alertaMovimiento(Movimiento movimiento) {
@@ -362,9 +478,9 @@ public class Consola {
                 break;
         }
         if (!informacion.isEmpty()) {
-            mensaje("┌─ EVENTO DE JUGADA ──────────────────────────────────────┐");
-            mensaje("│  >> %-51s │", informacion);
-            mensaje("└─────────────────────────────────────────────────────────┘");
+            mensaje(amarillo + "┌─ EVENTO DE JUGADA ──────────────────────────────────────┐");
+            mensaje("│  " + blanco + ">> %-51s " + amarillo + "│", informacion);
+            mensaje("└─────────────────────────────────────────────────────────┘" + RESET);
         }
     }
     
@@ -372,10 +488,9 @@ public class Consola {
     
     // Partida
     public void sinPartidasGuardadas() {
-        mensaje("""
-        ┌─ PARTIDAS GUARDADAS ─────────────────────────────────────────────────────────┐
-        │                      -- No hay partidas guardadas --                         │
-        └──────────────────────────────────────────────────────────────────────────────┘""");
+        mensaje(rojo + "┌─ " + amarillo + "PARTIDAS GUARDADAS " + rojo + "─────────────────────────────────────────────────────────┐");
+        mensaje("│                      " + blanco + "-- No hay partidas guardadas --                         " + rojo + "│");
+        mensaje("└──────────────────────────────────────────────────────────────────────────────┘" + RESET);
     }
 
     public void partidasPendientes(List<Partida> partidas) {
@@ -384,9 +499,9 @@ public class Consola {
             return;
         }
 
-        mensaje("┌─ PARTIDAS GUARDADAS ─────────────────────────────────────────────────────────┐");
-        mensaje("│ ID  │ FECHA Y HORA        │ TIPO     │ TIEMPO          │ ESTADO              │");
-        mensaje("├─────┼─────────────────────┼──────────┼─────────────────┼─────────────────────┤");
+        mensaje(rojo + "┌─ " + amarillo + "PARTIDAS GUARDADAS " + rojo + "─────────────────────────────────────────────────────────┐" + RESET);
+        mensaje(rojo + "│" + amarillo + " ID  " + rojo + "│" + amarillo + " FECHA Y HORA        " + rojo + "│" + amarillo + " TIPO     " + rojo + "│" + amarillo + " TIEMPO          " + rojo + "│" + amarillo + " ESTADO              " + rojo + "│" + RESET);
+        mensaje(rojo + "├─────┼─────────────────────┼──────────┼─────────────────┼─────────────────────┤" + RESET);
         java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         for (Partida p : partidas) {
@@ -394,9 +509,9 @@ public class Consola {
             String tipo = (p.getTipoPartida() != null) ? p.getTipoPartida().toString() : "LOCAL";
             String tiempo = p.getTiempoControl();
             String estado = (p.getEstado() != null) ? p.getEstado().toString() : "EN PAUSA";
-            mensaje("│ %-3d │ %-19s │ %-8s │ %-15s │ %-19s │", p.getIdPartida(), fecha, tipo, tiempo, estado);
+            mensaje(rojo + "│" + blanco + " %-3d " + rojo + "│" + blanco + " %-19s " + rojo + "│" + blanco + " %-8s " + rojo + "│" + blanco + " %-15s " + rojo + "│" + blanco + " %-19s " + rojo + "│" + RESET, p.getIdPartida(), fecha, tipo, tiempo, estado);
         }
-        mensaje("└──────────────────────────────────────────────────────────────────────────────┘");
+        mensaje(rojo + "└──────────────────────────────────────────────────────────────────────────────┘" + RESET);
     }
 
     public void partidasFinalizadas(List<Partida> partidas) {
@@ -405,9 +520,9 @@ public class Consola {
             return;
         }
 
-        mensaje("┌─ PARTIDAS GUARDADAS ──────────────────────────────────────────────────────┐");
-        mensaje("│ ID  │ FECHA FIN         │ TIPO     │ RESULTADO    │ CAUSA DE FINALIZACIÓN │");
-        mensaje("├─────┼───────────────────┼──────────┼──────────────┼───────────────────────┤");
+        mensaje(rojo + "┌─ " + amarillo + "PARTIDAS GUARDADAS " + rojo + "──────────────────────────────────────────────────────┐" + RESET);
+        mensaje(rojo + "│ " + amarillo + "ID  " + rojo + "│" + amarillo + " FECHA FIN         " + rojo + "│" + amarillo + " TIPO     " + rojo + "│" + amarillo + " RESULTADO    " + rojo + "│" + amarillo + " CAUSA DE FINALIZACIÓN " + rojo + "│");
+        mensaje("├─────┼───────────────────┼──────────┼──────────────┼───────────────────────┤" + RESET);
         java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         for (Partida p : partidas) {
@@ -415,22 +530,22 @@ public class Consola {
             String tipo = (p.getTipoPartida() != null) ? p.getTipoPartida() : "LOCAL";
             String resultado = (p.getResultado() != null) ? p.getResultado() : "N/A";
             String causa = (p.getCausaFinalizacion() != null) ? p.getCausaFinalizacion() : "N/A";
-            mensaje("│ %-3d │ %-17s │ %-8s │ %-12s │ %-21s │", p.getIdPartida(), fecha, tipo, resultado, causa);
+            mensaje(rojo + "│" + blanco + " %-3d " + rojo + "│" + blanco + " %-17s " + rojo + "│" + blanco + " %-8s " + rojo + "│" + blanco + " %-12s " + rojo + "│" + blanco + " %-21s " + rojo + "│", p.getIdPartida(), fecha, tipo, resultado, causa);
         }
-        mensaje("└───────────────────────────────────────────────────────────────────────────┘");
+        mensaje(rojo + "└───────────────────────────────────────────────────────────────────────────┘" + RESET);
     }
 
     public void mostrarFinPartida(String causa) {
         String texto = String.format("PARTIDA FINALIZADA ── CAUSA: %s", causa);
-        mensaje("┌──────────────────────────────────────────────────────────┐");
-        mensaje("│  %-56s│", texto);
-        mensaje("└──────────────────────────────────────────────────────────┘");
+        mensaje(amarillo + "┌──────────────────────────────────────────────────────────┐" + RESET);
+        mensaje(amarillo + "│" + blanco + "  %-56s" + amarillo + "│" + RESET, texto);
+        mensaje(amarillo + "└──────────────────────────────────────────────────────────┘" + RESET);
     }
 
     public void mostrarEstadoActualPartida() {
-        mensaje("┌──────────────────────────────────────────────────────────┐");
-        mensaje("│  %-56s│", "ESTADO ACTUAL DEL TABLERO");
-        mensaje("└──────────────────────────────────────────────────────────┘");
+        mensaje(rojo + "┌──────────────────────────────────────────────────────────┐");
+        mensaje("│" + amarillo + "  %-56s" + rojo + "│", "ESTADO ACTUAL DEL TABLERO");
+        mensaje("└──────────────────────────────────────────────────────────┘" + RESET);
     }
 
     // Usuario

@@ -8,7 +8,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import consola.Consola;
 import modelo.Jugador;
 import persistencia.Conexion;
 
@@ -22,11 +21,11 @@ public class JugadorDao {
         usuarioDao = new UsuarioDao();
     }
 
-    public void registrar(Jugador jugador) {
+    public boolean registrar(Jugador jugador) {
         sql = "INSERT INTO ajedrez.jugador(id_usuario, nombre_jugador, tipo, elo, victorias, derrotas, tablas, rendiciones, abandonos) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -47,29 +46,30 @@ public class JugadorDao {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
                         jugador.setIdJugador(rs.getInt(1));
+                        return true;
                     }
                 }
             }
         } catch (SQLException e) {
-            Consola.error("Error al registrar jugador: " + e.getMessage());
+            return false;
         }
-        return;
+        return false;
     }
 
-    public void eliminar(int idJugador) {
+    public boolean eliminar(int idJugador) {
         sql = "DELETE FROM ajedrez.jugador WHERE id_jugador = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idJugador); 
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al eliminar jugador: " + e.getMessage());
+            return false;
         }
-        return;
     }
 
     public List<Jugador> mostrar() {
@@ -99,16 +99,16 @@ public class JugadorDao {
                 jugadores.add(jugador);
             }
         } catch (SQLException e) {
-            Consola.error("Error al mostrar jugadores guardados: " + e.getMessage());
+            return jugadores;
         }
         return jugadores;
     }
 
-    public void actualizar(Jugador jugador) {
+    public boolean actualizar(Jugador jugador) {
         sql = "UPDATE ajedrez.jugador SET nombre_jugador = ?, tipo = ?, elo = ?, victorias = ?, derrotas = ?, tablas = ?, rendiciones = ?, abandonos = ? WHERE id_jugador = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -122,8 +122,9 @@ public class JugadorDao {
             pstmt.setInt(8, jugador.getAbandonos());
             pstmt.setInt(9, jugador.getIdJugador());
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al actualizar jugador: " + e.getMessage());
+            return false;
         }
     }
 
@@ -155,7 +156,7 @@ public class JugadorDao {
                 return jugador;
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar jugador: " + e.getMessage());
+            return null;
         }
         return null;
     }
@@ -189,32 +190,33 @@ public class JugadorDao {
                 jugadores.add(jugador);
             }
         } catch (SQLException e) {
-            Consola.error("Error al buscar jugadores: " + e.getMessage());
+            return jugadores;
         }
         return jugadores;
     }
 
-    public void actualizarElo(int idJugador, int elo) {
+    public boolean actualizarElo(int idJugador, int elo) {
         sql = "UPDATE ajedrez.jugador SET elo = ? WHERE id_jugador = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, elo);
             pstmt.setInt(2, idJugador);
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al actualizar jugador: " + e.getMessage());
+            return false;
         }
     }
 
-    public void actualizarEstadisticas(Jugador jugador) {
+    public boolean actualizarEstadisticas(Jugador jugador) {
         sql = "UPDATE ajedrez.jugador SET elo = ?, victorias = ?, derrotas = ?, tablas = ?, rendiciones = ?, abandonos = ? WHERE id_jugador = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
-            return;
+            return false;
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -226,8 +228,9 @@ public class JugadorDao {
             pstmt.setInt(6, jugador.getAbandonos());
             pstmt.setInt(7, jugador.getIdJugador());
             pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
-            Consola.error("Error al actualizar jugador: " + e.getMessage());
+            return false;
         }
     }
 }
