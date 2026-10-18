@@ -36,8 +36,7 @@ public class ParticipacionDao {
             pstmt.setBoolean(3, participacion.getColor());
             pstmt.setString(4, participacion.getResultadoIndividual());
             pstmt.setInt(5, participacion.getTiempoRestante());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -52,8 +51,7 @@ public class ParticipacionDao {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idParticipacion); 
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -95,8 +93,7 @@ public class ParticipacionDao {
             pstmt.setString(1, participacion.getResultadoIndividual());
             pstmt.setInt(2, participacion.getTiempoRestante());
             pstmt.setInt(3, participacion.getIdParticipacion());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -238,8 +235,7 @@ public class ParticipacionDao {
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, participacion.getResultadoIndividual());
             pstmt.setInt(2, participacion.getIdParticipacion());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -255,8 +251,7 @@ public class ParticipacionDao {
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, participacion.getTiempoRestante());
             pstmt.setInt(2, participacion.getIdParticipacion());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }

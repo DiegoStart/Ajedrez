@@ -14,7 +14,7 @@ public class AjedrezAlpha {
         Consola consola = new Consola();
 
         while (true) {
-            consola.menuPrincipal();
+            consola.menuPrincipal(null);
             int opcion = Excepciones.leerNumero("Elige una opción", -1, 6);
             switch (opcion) {
                 case -1:

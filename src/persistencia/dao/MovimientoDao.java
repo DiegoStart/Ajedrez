@@ -44,8 +44,7 @@ public class MovimientoDao {
             pstmt.setString(12, movimiento.getNotacionAlgebraica());
             pstmt.setString(13, movimiento.getPiezaPromocion());
             pstmt.setString(14, movimiento.getFen());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -60,8 +59,7 @@ public class MovimientoDao {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idMovimiento); 
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -274,8 +272,7 @@ public class MovimientoDao {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida); 
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }

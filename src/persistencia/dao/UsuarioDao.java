@@ -64,8 +64,7 @@ public class UsuarioDao {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idUsuario); 
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -123,8 +122,7 @@ public class UsuarioDao {
             pstmt.setTimestamp(7, Timestamp.valueOf(usuario.getUltimoAcceso()));
             pstmt.setString(8, usuario.getEstado());
             pstmt.setInt(9, usuario.getIdUsuario());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
            return false; 
         }
@@ -227,7 +225,7 @@ public class UsuarioDao {
     }
 
     public boolean actualizarUltimoAcceso(int idUsuario) {
-        sql = "UPDATE ajedrez.usuario SET ultimo_acceso = ? WHERE id_usuario = ?";
+        sql = "UPDATE ajedrez.usuario SET ultimo_acceso = ?, estado = 'ACTIVO' WHERE id_usuario = ?";
         Connection conn = conexion.establecerConexion();
         if (conn == null) {
             return false;
@@ -236,8 +234,7 @@ public class UsuarioDao {
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
             pstmt.setInt(2, idUsuario);
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }

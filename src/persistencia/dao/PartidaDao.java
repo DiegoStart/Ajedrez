@@ -57,8 +57,7 @@ public class PartidaDao {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida); 
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -111,8 +110,7 @@ public class PartidaDao {
                 pstmt.setNull(4, java.sql.Types.TIMESTAMP);
             }
             pstmt.setInt(5, partida.getIdPartida());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -225,8 +223,7 @@ public class PartidaDao {
             pstmt.setString(2, partida.getCausaFinalizacion());
             pstmt.setInt(3, partida.getDuracion());
             pstmt.setInt(4, partida.getIdPartida());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -242,8 +239,7 @@ public class PartidaDao {
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, estado);
             pstmt.setInt(2, idPartida);
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -257,8 +253,7 @@ public class PartidaDao {
         }
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }

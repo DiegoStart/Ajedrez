@@ -61,8 +61,7 @@ public class InstantaneaDao {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idInstantanea); 
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -112,8 +111,7 @@ public class InstantaneaDao {
             pstmt.setInt(6, instantanea.getContadorMovimientos());
             pstmt.setInt(7, instantanea.getCincuentaMovimientos());
             pstmt.setInt(8, instantanea.getIdInstantanea());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -193,8 +191,7 @@ public class InstantaneaDao {
             pstmt.setInt(6, instantanea.getContadorMovimientos());
             pstmt.setInt(7, instantanea.getCincuentaMovimientos());
             pstmt.setInt(8, instantanea.getPartida().getIdPartida());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -209,8 +206,7 @@ public class InstantaneaDao {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idPartida); 
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }

@@ -65,8 +65,7 @@ public class JugadorDao {
 
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, idJugador); 
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -121,8 +120,7 @@ public class JugadorDao {
             pstmt.setInt(7, jugador.getRendiciones());
             pstmt.setInt(8, jugador.getAbandonos());
             pstmt.setInt(9, jugador.getIdJugador());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -205,8 +203,7 @@ public class JugadorDao {
         try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, elo);
             pstmt.setInt(2, idJugador);
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }
@@ -227,8 +224,7 @@ public class JugadorDao {
             pstmt.setInt(5, jugador.getRendiciones());
             pstmt.setInt(6, jugador.getAbandonos());
             pstmt.setInt(7, jugador.getIdJugador());
-            pstmt.executeUpdate();
-            return true;
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             return false;
         }

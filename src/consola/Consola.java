@@ -163,9 +163,20 @@ public class Consola {
         """ + RESET);
     }
     
-    public void menuPrincipal() {
-        titulo();
-        mensaje(rojo + "┌─" + amarillo + " MENÚ PRINCIPAL" + rojo + " ─────────────────────────" + blanco + " ESTADO:" + amarillo + " OFFLINE" + rojo + " ─┐");                                                
+    public void menuInicio() {
+        mensaje(rojo + "┌─" + amarillo + " ¡A JUGAR AJEDREZ!" + rojo + " ────────────────────────────────────────┐");
+        mensaje(rojo + "│  " + blanco + "[ 1 ]  Soy nuevo por aquí                                 " + rojo + "│");
+        mensaje(rojo + "│  " + blanco + "[ 2 ]  Ya tengo cuenta                                    " + rojo + "│");
+        mensaje(rojo + "│  " + blanco + "[ 3 ]  Solo quiero una partida rápida                     " + rojo + "│");
+        mensaje(rojo + "│                                                            │");
+        mensaje(rojo + "│  " + blanco + "[ 0 ]  Cerrar                                             " + rojo + "│");
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
+    }
+    
+    public void menuPrincipal(Usuario usuario) {
+        String nombre = usuario != null ? usuario.getNombreUsuario() : "INVITADO";
+
+        mensaje(rojo + "┌─" + amarillo + " MENÚ PRINCIPAL " + rojo + "─".repeat(28 - nombre.length()) + blanco + " BIENVENIDO: " + amarillo + nombre + rojo + " ─┐");                                              
         mensaje(rojo + "│  " + blanco + "[ 1 ]  NUEVA PARTIDA                                      " + rojo + "│");
         mensaje(rojo + "│  " + blanco + "[ 2 ]  CARGAR PARTIDA                                     " + rojo + "│");
         mensaje(rojo + "│  " + blanco + "[ 3 ]  HISTORIAL DE PARTIDAS                              " + rojo + "│");
