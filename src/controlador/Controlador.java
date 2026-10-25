@@ -242,6 +242,14 @@ public class Controlador {
         return usuarioDao.buscarPorNombreUsuario(nombreUsuario);
     }
 
+    public boolean buscarUsuarioExisteUsuario(String nombreUsuario) {
+        return usuarioDao.buscarUsuarioExiste(nombreUsuario);
+    }
+
+    public boolean buscarCorreoExisteUsuario(String correo) {
+        return usuarioDao.buscarCorreoExiste(correo);
+    }
+
     public boolean actualizarUltimoAccesoUsuario(int idUsuario) {
         return usuarioDao.actualizarUltimoAcceso(idUsuario);
     }

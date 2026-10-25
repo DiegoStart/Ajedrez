@@ -39,7 +39,11 @@ public class UsuarioDao {
             }
             pstmt.setString(5, usuario.getGenero());
             pstmt.setString(6, usuario.getFotoPerfil());
-            pstmt.setTimestamp(7, Timestamp.valueOf(usuario.getUltimoAcceso()));
+            if (usuario.getUltimoAcceso() != null) {
+                pstmt.setTimestamp(7, Timestamp.valueOf(usuario.getUltimoAcceso()));
+            } else {
+                pstmt.setNull(7, java.sql.Types.TIMESTAMP);
+            }
             pstmt.setString(8, usuario.getEstado());
             if (pstmt.executeUpdate() > 0) {
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
@@ -182,7 +186,11 @@ public class UsuarioDao {
                 usuario.setGenero(rs.getString("genero"));
                 usuario.setFotoPerfil(rs.getString("foto_perfil"));
                 usuario.setFechaRegistro(rs.getTimestamp("fecha_registro").toLocalDateTime());
-                usuario.setUltimoAcceso(rs.getTimestamp("ultimo_acceso").toLocalDateTime());
+                if (rs.getTimestamp("ultimo_acceso") != null) {
+                    usuario.setUltimoAcceso(rs.getTimestamp("ultimo_acceso").toLocalDateTime());
+                } else {
+                    usuario.setUltimoAcceso(null);
+                }
                 usuario.setEstado(rs.getString("estado"));
                 return usuario;
             }
@@ -214,7 +222,11 @@ public class UsuarioDao {
                 usuario.setGenero(rs.getString("genero"));
                 usuario.setFotoPerfil(rs.getString("foto_perfil"));
                 usuario.setFechaRegistro(rs.getTimestamp("fecha_registro").toLocalDateTime());
-                usuario.setUltimoAcceso(rs.getTimestamp("ultimo_acceso").toLocalDateTime());
+                if (rs.getTimestamp("ultimo_acceso") != null) {
+                    usuario.setUltimoAcceso(rs.getTimestamp("ultimo_acceso").toLocalDateTime());
+                } else {
+                    usuario.setUltimoAcceso(null);
+                }
                 usuario.setEstado(rs.getString("estado"));
                 return usuario;
             }
@@ -222,6 +234,40 @@ public class UsuarioDao {
             return null;
         }
         return null;
+    }
+
+    public boolean buscarUsuarioExiste(String nombreUsuario) {
+        sql = "SELECT 1 FROM ajedrez.usuario WHERE nombre_usuario = ?";
+        Connection conn = conexion.establecerConexion();
+        if (conn == null) {
+            return false;
+        }
+
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, nombreUsuario);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean buscarCorreoExiste(String correo) {
+        sql = "SELECT 1 FROM ajedrez.usuario WHERE correo = ?";
+        Connection conn = conexion.establecerConexion();
+        if (conn == null) {
+            return false;
+        }
+
+        try (conn; PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, correo);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public boolean actualizarUltimoAcceso(int idUsuario) {

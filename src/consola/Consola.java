@@ -164,6 +164,7 @@ public class Consola {
     }
     
     public void menuInicio() {
+        titulo();
         mensaje(rojo + "┌─" + amarillo + " ¡A JUGAR AJEDREZ!" + rojo + " ────────────────────────────────────────┐");
         mensaje(rojo + "│  " + blanco + "[ 1 ]  Soy nuevo por aquí                                 " + rojo + "│");
         mensaje(rojo + "│  " + blanco + "[ 2 ]  Ya tengo cuenta                                    " + rojo + "│");
@@ -183,6 +184,16 @@ public class Consola {
         mensaje(rojo + "│  " + blanco + "[ 4 ]  RECREAR PARTIDA                                    " + rojo + "│");
         mensaje(rojo + "│  " + blanco + "[ 5 ]  EXPORTAR PGN                                       " + rojo + "│");
         mensaje(rojo + "│  " + blanco + "[ 6 ]  ESTADÍSTICAS                                       " + rojo + "│");
+        mensaje(rojo + "│                                                            │");
+        mensaje(rojo + "│  " + blanco + "[ 0 ]  CERRAR SESIÓN                                      " + rojo + "│");
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
+    }
+
+    public void menuInvitado() {
+        String nombre = "INVITADO";
+
+        mensaje(rojo + "┌─" + amarillo + " PARITDA RAPIDA " + rojo + "─".repeat(28 - nombre.length()) + blanco + " BIENVENIDO: " + amarillo + nombre + rojo + " ─┐");                                              
+        mensaje(rojo + "│  " + blanco + "[ 1 ]  NUEVA PARTIDA                                      " + rojo + "│");
         mensaje(rojo + "│                                                            │");
         mensaje(rojo + "│  " + blanco + "[ 0 ]  SALIR DEL JUEGO                                    " + rojo + "│");
         mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
@@ -218,6 +229,56 @@ public class Consola {
         mensaje(rojo + "│  " + amarillo + ">> Desconectando...                                       " + rojo + "│" + RESET);
         mensaje(rojo + "│  " + amarillo + ">> ¡Gracias por jugar!                                    " + rojo + "│" + RESET);
         mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
+    }
+
+    public void menuGenero() {
+        mensaje(rojo + "┌─" + amarillo + " SELECCIONA TU GÉNERO" + rojo + " ─────────────────────────────────────┐");
+        mensaje(rojo + "│  " + blanco + "[ 1 ]  MASCULINO                                          " + rojo + "│");
+        mensaje(rojo + "│  " + blanco + "[ 2 ]  FEMENINO                                           " + rojo + "│");
+        mensaje(rojo + "│  " + blanco + "[ 3 ]  OTRO / PREFIERO NO ESPECIFICAR                     " + rojo + "│");
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
+    }
+
+    public void bannerFechaNacimiento() {
+        mensaje(rojo + "┌─" + amarillo + " FECHA DE NACIMIENTO" + rojo + " ──────────────────────────────────────┐");
+        mensaje(rojo + "│  " + blanco + "Ingresa los datos solicitados a continuación.             " + rojo + "│");
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
+    }
+
+    public void bannerRegistro() {
+        mensaje(rojo + "┌─" + amarillo + " CREAR NUEVO PERFIL " + rojo + "───────────────────────────────────────┐");
+        mensaje(rojo + "│  " + blanco + "Ingresa tus datos para completar el registro.             " + rojo + "│");
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
+    }
+
+    public void exitoRegistro(String nombre) {
+        mensaje(rojo + "┌─" + amarillo + " REGISTRO EXITOSO " + rojo + "─────────────────────────────────────────┐");
+        mensaje(rojo + "│  " + blanco + String.format("¡Bienvenido al juego %-37s", nombre + "!") + rojo + "│");
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
+    }
+
+    public void bannerIniciarSesion() {
+        mensaje(rojo + "┌─" + amarillo + " INICIAR SESIÓN " + rojo + "───────────────────────────────────────────┐");
+        mensaje(rojo + "│  " + blanco + "Ingresa tus credenciales de acceso.                       " + rojo + "│");
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
+    }
+
+    public void exitoIniciarSesion(String nombre) {
+        mensaje(rojo + "┌─" + amarillo + " SESIÓN INICIADA " + rojo + "──────────────────────────────────────────┐");
+        mensaje(rojo + "│  " + blanco + String.format("Hola de nuevo %-44s", nombre) + rojo + "│");
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
+    }
+
+    public void exitoCerrarSesion() {
+        mensaje(rojo + "┌─" + amarillo + " CERRAR SESIÓN " + rojo + "────────────────────────────────────────────┐");
+        mensaje(rojo + "│  " + blanco + "Sesión cerrada correctamente. ¡Hasta pronto!              " + rojo + "│");
+        mensaje(rojo + "└────────────────────────────────────────────────────────────┘" + RESET);
+    }
+
+    public void errorCaja(String Error) {
+        mensaje(azul + "┌─ ERROR ────────────────────────────────────────────────────┐");
+        mensaje(azul + "│  " + blanco + String.format("%-58s", Error) + azul + "│");
+        mensaje(azul + "└────────────────────────────────────────────────────────────┘" + RESET);
     }
 
     // Tablero

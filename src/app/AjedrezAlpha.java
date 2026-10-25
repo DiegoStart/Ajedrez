@@ -6,7 +6,7 @@ import consola.*;
 import controlador.Controlador;
 import core.*;
 import modelo.*;
-import util.Excepciones;
+import util.*;
 
 public class AjedrezAlpha {
     public static void main(String[] args) {
@@ -14,17 +14,108 @@ public class AjedrezAlpha {
         Consola consola = new Consola();
 
         while (true) {
-            consola.menuPrincipal(null);
-            int opcion = Excepciones.leerNumero("Elige una opción", -1, 6);
+            consola.menuInicio();
+            int opcion = Excepciones.leerNumero("Elige una opción", -1, 3);
             switch (opcion) {
                 case -1:
                     eliminar(controlador, consola);
                     break;
                 case 0:
                     consola.menuSalida();
-                    return;
+                    return ;
                 case 1:
-                    iniciarNuevaPartida(controlador, consola);
+                    registrarUsuario(controlador, consola);
+                    break;
+                case 2:
+                    menuPrincipal(controlador, consola);
+                    break;
+                case 3:
+                    menuInvitado(controlador, consola);
+                    break;
+            }
+        }
+    }
+
+    //Cuentas y autentificación
+    private static void registrarUsuario(Controlador controlador, Consola consola) {
+        Usuario usuario = new Usuario();
+        consola.bannerRegistro();
+
+        usuario.setNombreUsuario(Excepciones.leerUsuario(controlador));
+        usuario.setCorreo(Excepciones.leerCorreo(controlador));
+        String contrasena = Excepciones.leerContrasena();
+        usuario.setContrasena(Encriptador.generarHash(contrasena));
+
+        consola.bannerFechaNacimiento();        
+        usuario.setFechaNacimiento(Excepciones.leerFecha());
+        consola.menuGenero();
+       
+        switch (Excepciones.leerNumero("Selecciona una opción: ", 1, 3)) {
+            case 1: 
+                usuario.setGenero("HOMBRE");
+                break;
+            case 2 : 
+                usuario.setGenero("MUJER");
+                break;
+            case 3 :
+                usuario.setGenero("NO ESPECIFICADO");
+                break;
+        }
+
+        if (controlador.registrarUsuario(usuario)) {
+            consola.exitoRegistro(usuario.getNombreUsuario());
+        } else {
+            consola.errorCaja("No se pudo crear la cuenta. Nombre o correo en uso.");
+        }
+    }
+
+    private static Usuario iniciarSesion(Controlador controlador, Consola consola) {
+        consola.bannerIniciarSesion();
+        String nombre = Excepciones.leerString(">> Usuario : ").trim();
+        String contrasena = Excepciones.leerString(">> Contraseña : ");
+
+        Usuario usuario = controlador.buscarPorNombreUsuarioUsuario(nombre);
+        if (usuario == null) {
+            consola.errorCaja("Usuario o contraseña incorrectos.");
+            return null;
+        }
+        if (!Encriptador.verificarContrasena(contrasena, usuario.getContrasena())) {
+            consola.errorCaja("Usuario o contraseña incorrectos.");
+            return null;
+        }
+        if (!controlador.actualizarUltimoAccesoUsuario(usuario.getIdUsuario())) {
+            consola.errorCaja("No se pudo actualizar el último acceso.");
+            return null;
+        }
+        usuario.setUltimoAcceso(java.time.LocalDateTime.now());
+        usuario.setEstado("ACTIVO");
+        consola.exitoIniciarSesion(usuario.getNombreUsuario());
+        return usuario;
+    }
+
+    private static void cerrarSesion(Controlador controlador, Consola consola, Usuario usuario) {
+        usuario.setEstado("INACTIVO");
+
+        if (controlador.actualizarUsuario(usuario)) {
+            consola.exitoCerrarSesion();
+        } else {
+            usuario.setEstado("ACTIVO");
+            consola.errorCaja("No se pudo cerrar la sesión en el sistema.");
+        }
+    }
+
+    //Menus del sistema
+    public static void menuPrincipal(Controlador controlador, Consola consola) {
+        Usuario usuario = iniciarSesion(controlador, consola);
+        while (usuario != null) {
+            consola.menuPrincipal(usuario);
+            int opcion = Excepciones.leerNumero("Elige una opción", 0, 6);
+            switch (opcion) {
+                case 0:
+                    cerrarSesion(controlador, consola, usuario);
+                    return ;
+                case 1:
+                    iniciarNuevaPartida(controlador, consola, usuario);
                     break;
                 case 2:
                     cargarPartida(controlador, consola);
@@ -45,8 +136,23 @@ public class AjedrezAlpha {
         }
     }
 
-    //Gestion del menu
-    private static void iniciarNuevaPartida(Controlador controlador, Consola consola) {
+    private static void menuInvitado(Controlador controlador, Consola consola) {
+        while (true) {
+            consola.menuInvitado();
+            int opcion = Excepciones.leerNumero("Elige una opción", 0, 1);
+            switch (opcion) {
+                case 0:
+                    consola.exitoCerrarSesion();
+                    return;
+                case 1:
+                    iniciarNuevaPartida(controlador, consola, null);
+                    break;
+            }
+        }
+    }
+
+    //Gestion del menu Principal
+    private static void iniciarNuevaPartida(Controlador controlador, Consola consola, Usuario usuario) {
         Jugador jugadorBlanco = new Jugador();
         Jugador jugadorNegro = new Jugador();
         Partida partida = new Partida();
@@ -57,7 +163,9 @@ public class AjedrezAlpha {
             String nombreBlanco = Excepciones.leerNombre(consola. getBlancas() + "[+] Jugador BLANCO >> ");
             String nombreNegro  = Excepciones.leerNombre(consola.getNegras() + "[+] Jugador NEGRO  >> ");
             jugadorBlanco.setNombreJugador(nombreBlanco);
+            jugadorBlanco.setUsuario(usuario);
             jugadorNegro.setNombreJugador(nombreNegro);
+            jugadorNegro.setUsuario(usuario);
             consola.menuContrincantes(jugadorBlanco, jugadorNegro);
             int confirmacion = Excepciones.leerNumero(" > [1] SÍ  │  [2] NO > ", 1, 2);
             
@@ -126,7 +234,7 @@ public class AjedrezAlpha {
 
         Instantanea instantanea = controlador.buscarPorPartidaInstantanea(idPartida);
         if (instantanea == null) {
-            consola.error("La partida no tiene una instantánea guardada.");
+            consola.errorCaja("La partida no tiene una instantánea guardada.");
             return;
         }
         
@@ -137,7 +245,7 @@ public class AjedrezAlpha {
             }
             jugarPartida(controlador, consola, tablero, partida, instantanea);
         } else {
-            consola.error("Error a cargar tablero");
+            consola.errorCaja("Error a cargar tablero");
         }
     }
 
@@ -453,7 +561,7 @@ public class AjedrezAlpha {
             Movimiento movimiento = tablero.moverPieza(filaOrigen, colOrigen, filaDestino, colDestino);
 
             if (movimiento == null) {
-                consola.error("── [ ERROR: MOVIMIENTO INVÁLIDO ] ─────────────────────────");
+                consola.errorCaja("── [ ERROR: MOVIMIENTO INVÁLIDO ] ──────────────────────");
                 return false;
             }
             consola.alertaMovimiento(movimiento);
@@ -477,7 +585,7 @@ public class AjedrezAlpha {
             controlador.actualizarPartida(partida);
             return true;
         } catch (Exception e) {
-            consola.error("Error al mover: " + e.getMessage());
+            consola.errorCaja("Error al mover: " + e.getMessage());
             return false;
         }
     }

@@ -16,8 +16,7 @@ public class Usuario {
     private String estado;
 
     public Usuario() {
-        estado = "ACTIVO";
-        ultimoAcceso = LocalDateTime.now();
+        estado = "INACTIVO";
     }
 
     public int getIdUsuario() { 

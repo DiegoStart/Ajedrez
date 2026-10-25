@@ -1,87 +1,95 @@
-# ♟️ Ajedrez en Java
+<div align="center">
 
-El presente proyecto consiste en el desarrollo de un sistema de ajedrez en **Java** como parte de mi formación en Ingeniería en Sistemas Computacionales.
+# ♟️ AJEDREZ ♟️
 
-u objetivo es implementar las principales reglas del ajedrez, permitir el desarrollo de partidas mediante una interfaz gráfica y almacenar la información de las partidas utilizando **PostgreSQL**.
+> **🔴🟡 Sistema de Ajedrez Táctico, Multiversión y Persistente ⚪⚫**  
+> *El ajedrez es como la vida: si tienes miedo de perder, nunca ganarás.*
 
-## 🎮 Características
+<p align="center">
+  <img src="https://img.shields.io/badge/JAVA-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java">
+  <img src="https://img.shields.io/badge/POSTGRESQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/STATUS-ALPHA_EDITION-yellow?style=for-the-badge&logo=chess&logoColor=black" alt="Status">
+  <img src="https://img.shields.io/badge/INTERFACE-2D_%2F_CLI-red?style=for-the-badge" alt="Interface">
+</p>
 
-* Juego de ajedrez.
-* Implementación de las reglas oficiales.
-* Enroque corto y largo.
-* Captura al paso.
-* Promoción de peón.
-* Jaque y jaque mate.
-* Ahogado.
-* Tablas por material insuficiente.
-* Tablas por triple repetición.
-* Regla de los 50 movimientos.
-* Temporizador por jugador.
-* Registro de movimientos y notación algebraica.
-* Almacenamiento del estado de la partida mediante FEN.
-* Guardado y carga de partidas con PostgreSQL.
-* Gestión de usuarios y jugadores.
-* Sistema de participaciones por partida.
-* Interfaz gráfica 2D.
+</div>
 
-## 🛠️ Tecnologías
+---
 
-* **Java**
-* **PostgreSQL**
-* **JDBC**
-* **Visual Studio Code**
+## 🕹️ SOBRE EL JUEGO
 
-## 📂 Estructura del proyecto
+**Ajedrez en Java** es un motor y sistema completo de ajedrez diseñado bajo una arquitectura modular robusta. Implementa rigurosamente las reglas oficiales de la FIDE, gestión de usuarios con seguridad integrada, persistencia avanzada de partidas en **PostgreSQL** y múltiples interfaces (tanto en consola con estilo clásico como interfaz gráfica 2D).
+
+---
+
+## ⚡ CARACTERÍSTICAS PRINCIPALES
+
+- ⚔️ **Reglas Oficiales Completas:** Enroque corto y largo, captura al paso y promoción de peón.
+- 🚨 **Estados de Partida:** Detección automática de Jaque, Jaque Mate, Ahogado y Tablas (por material insuficiente, triple repetición y regla de los 50 movimientos).
+- ⏱️ **Sistema de Tiempo:** Temporizadores sincronizados por jugador.
+- 📜 **Historial Táctico:** Registro de movimientos en notación algebraica y soporte de estado mediante **FEN**.
+- 🛡️ **Seguridad y Base de Datos:** Control de usuarios con encriptación, gestión de jugadores y guardado/carga de partidas mediante **PostgreSQL** y patrones DAO.
+- 🖥️ **Interfaces Dinámicas:** Ejecución modular evolutiva desde consola hasta interfaz gráfica 2D con recursos visuales personalizados.
+
+---
+
+## 🚀 FASES EVOLUTIVAS DEL SISTEMA
+
+El desarrollo ha evolucionado a través de distintas iteraciones de arquitectura:
+- **`Alpha` ➔ `Beta` ➔ `Gamma` ➔ `Delta` ➔ `Omega`** *(Versiones de evolución y refinamiento del motor ubicadas en `src/app/`)*.
+
+---
+
+## 📂 ESTRUCTURA DEL PROYECTO
 
 ```text
 .
-├── assets/
+├── .github/                 # Registros de flujos y control de evolución
+├── .vscode/                 # Configuración de entorno de desarrollo
+├── assets/                  # Recursos visuales del juego
 │   └── Imagenes/
+│       ├── Botones/         # Elementos interactivos de la UI
+│       ├── Logos/           # Identidad visual del proyecto
+│       └── Piezas/          # Sprites gráficos de piezas de ajedrez
 ├── database/
-│   └── Ajedrez.sql
+│   └── Ajedrez.sql          # Script SQL maestro para la base de datos
 ├── src/
-│   ├── app/
-│   ├── consola/
-│   ├── controlador/
-│   ├── core/
-│   │   └── piezas/
-│   ├── gui/
-│   ├── modelo/
-│   └── persistencia/
-│       └── dao/
+│   ├── app/                 # Puntos de entrada evolutivos (Alpha a Omega)
+│   ├── consola/             # Interfaz de comandos y gestión de texto
+│   ├── controlador/         # Enlace entre la vista y las reglas de juego
+│   ├── core/                # Núcleo lógico del tablero, reglas y tiempo
+│   │   └── piezas/          # Lógica orientada a objetos de cada pieza
+│   ├── gui/                 # Interfaz gráfica de usuario 2D
+│   ├── modelo/              # Entidades POJO del sistema
+│   ├── persistencia/        # Conexión JDBC y patrones DAO
+│   └── util/                # Herramientas transversales (encriptación, excepciones)
 ├── .gitignore
-├── README.md
-├── config.example.properties
+├── config.example.properties # Plantilla de configuración de conexión
+├── config.properties        # Configuración local activa
+└── README.md
 ```
 
-### Organización principal
+### 🧩 Arquitectura por Capas (`src/`)
 
-| Paquete            | Responsabilidad                                          |
-| ------------------ | -------------------------------------------------------- |
-| `app`              | Puntos de entrada y versiones del proyecto               |
-| `consola`          | Funcionalidad relacionada con la consola y excepciones   |
-| `controlador`      | Coordinación entre la interfaz y la lógica del sistema   |
-| `core`             | Lógica principal del juego y reglas del ajedrez          |
-| `core/piezas`      | Implementación de las piezas de ajedrez                  |
-| `gui`              | Interfaz gráfica                                         |
-| `modelo`           | Entidades y datos del sistema                            |
-| `persistencia`     | Conexión y acceso a PostgreSQL                           |
-| `persistencia/dao` | Operaciones de acceso a cada entidad de la base de datos |
+| Módulo / Paquete | Responsabilidad Táctica |
+| :--- | :--- |
+| `app` | Lanzadores y versiones del sistema (`AjedrezAlpha` a `AjedrezOmega`). |
+| `consola` | Interfaz interactiva alternativa basada en texto. |
+| `controlador` | Orquestador de eventos entre las interfaces y el núcleo. |
+| `core` | Cerebro del juego: validaciones, tableros y temporizadores. |
+| `core/piezas` | Comportamientos específicos de Reyes, Reinas, Torres, Alfiles, Caballos y Peones. |
+| `gui` | Renderizado gráfico 2D de las partidas. |
+| `modelo` | Estructuras de datos y entidades de negocio. |
+| `persistencia` | Conexión a base de datos y operaciones CRUD mediante DAO. |
+| `util` | Seguridad, encriptación y utilidades generales. |
 
-## 🗄️ Base de datos
+---
 
-El proyecto utiliza **PostgreSQL** para almacenar la información de usuarios, jugadores y partidas.
+## 🗄️ BASE DE DATOS Y PERSISTENCIA
 
-### Entidades
+El motor se conecta a un servidor relacional en **PostgreSQL** para almacenar perfiles, jugadores e historiales de combate.
 
-* `usuario`
-* `jugador`
-* `partida`
-* `participacion`
-* `movimiento`
-* `instantanea`
-
-### Relaciones
+### 🔗 Relaciones del Sistema
 
 ```text
 USUARIO
@@ -97,53 +105,32 @@ PARTICIPACION
    │ N : 1
    │
 PARTIDA
-   │
    ├── 1 : N ──► MOVIMIENTO
    │
    └── 1 : 0..1 ──► INSTANTANEA
 ```
 
-### Configuración
+### ⚙️ Configuración Inicial
 
-1. Crear la base de datos PostgreSQL.
-2. Ejecutar el script:
+1. Crea una base de datos limpia en **PostgreSQL**.
+2. Ejecuta el script estructural:
+   ```text
+   database/Ajedrez.sql
+   ```
+3. Duplica el archivo `config.example.properties`, nombra la copia como `config.properties` y configura tus accesos:
+   ```properties
+   db.url=jdbc:postgresql://localhost:5432/nombre_tu_base
+   db.user=tu_usuario
+   db.password=tu_contraseña
+   ```
 
-```text
-database/Ajedrez.sql
-```
+---
 
-3. Crear el archivo `config.properties` tomando como referencia:
+## 👤 CREDITOS & AUTOR
 
-```text
-config.example.properties
-```
+<div align="center">
 
-## 🚀 Estado del proyecto
+**Diego Venegas Chávez**  
+*Ingeniería en Sistemas Computacionales*  
 
-### Versión actual
-
-* ✔ Lógica de ajedrez funcional.
-* ✔ Reglas oficiales principales implementadas.
-* ✔ Temporizadores.
-* ✔ Historial de movimientos.
-* ✔ Notación algebraica.
-* ✔ Detección de condiciones de tablas.
-* ✔ Persistencia en PostgreSQL.
-* ✔ Modelo de datos estructurado.
-* ✔ Sistema de usuarios y jugadores.
-* ✔ Interfaz gráfica 2D.
-* ✔ Arquitectura organizada por responsabilidades.
-
-### Próximamente
-
-* ⏳ Mejoras y ampliación de la interfaz gráfica.
-* ⏳ Inteligencia artificial.
-* ⏳ Multijugador.
-* ⏳ Interfaz gráfica 3D.
-* ⏳ Nuevas versiones y ampliaciones del sistema.
-
-## 👤 Autor
-
-**Diego Venegas Chávez**
-
-Estudiante de Ingeniería en Sistemas Computacionales.
+</div>
